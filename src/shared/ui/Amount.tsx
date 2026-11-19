@@ -6,8 +6,8 @@ interface AmountProps {
   /** API money string. Never a number. */
   value: string
   currency: string
-  /** Colour by sign (income green, expense red). Sign is always also shown as a glyph. */
-  tone?: 'auto' | 'neutral'
+  /** 'auto' colours by sign (income green, loss red); 'expense' is always red (outflows). Sign is always also shown as a glyph. */
+  tone?: 'auto' | 'neutral' | 'expense'
   signDisplay?: FormatOptions['signDisplay']
   /** Short form (1.3M) for tight spaces such as calendar cells. */
   compact?: boolean
@@ -47,7 +47,7 @@ export function Amount({
       className={cn(
         'tabular',
         tone === 'auto' && sign > 0 && 'text-positive',
-        tone === 'auto' && sign < 0 && 'text-negative',
+        (tone === 'auto' ? sign < 0 : tone === 'expense' && sign !== 0) && 'text-negative',
         className,
       )}
     >

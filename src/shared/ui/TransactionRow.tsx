@@ -24,6 +24,13 @@ export function signedAmount(t: TransactionDTO): string {
   return t.direction === 'OUT' && !amount.startsWith('-') ? `-${amount}` : amount
 }
 
+/** Outflows are always red, income green, transfers and adjustments neutral. */
+export function amountTone(t: TransactionDTO): 'auto' | 'expense' | 'neutral' {
+  if (t.type === 'EXPENSE') return 'expense'
+  if (t.type === 'INCOME') return 'auto'
+  return 'neutral'
+}
+
 export function TransactionRow({
   transaction: t,
   pending,
@@ -57,7 +64,7 @@ export function TransactionRow({
       <Amount
         value={signedAmount(t)}
         currency={t.currency ?? ''}
-        tone="auto"
+        tone={amountTone(t)}
         className="font-medium"
       />
     </div>

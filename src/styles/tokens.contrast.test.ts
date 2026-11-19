@@ -49,15 +49,15 @@ describe.each(Object.entries(themes))('%s theme contrast (WCAG AA, 4.5:1 for tex
   it('the label on a primary button (accent) is readable', () => {
     expect(ratio(t['accent-label'] as string, t.accent as string)).toBeGreaterThanOrEqual(4.5)
   })
-  it.each(SURFACES)('accent, positive, negative and warning used as text on %s', (surface) => {
-    for (const c of ['accent', 'positive', 'negative', 'warning']) {
+  it.each(SURFACES)('accent, up, down and warning used as text on %s', (surface) => {
+    for (const c of ['accent', 'up', 'down', 'warning']) {
       expect(
         ratio(t[c] as string, t[surface] as string),
         `${c} on ${surface}`,
       ).toBeGreaterThanOrEqual(4.5)
     }
   })
-  it('a destructive button label (on negative) is readable', () => {
-    expect(ratio(t['accent-label'] as string, t.negative as string)).toBeGreaterThanOrEqual(4.5)
+  it('a destructive button label (on down) is readable', () => {
+    expect(ratio(t['accent-label'] as string, t.down as string)).toBeGreaterThanOrEqual(4.5)
   })
 })

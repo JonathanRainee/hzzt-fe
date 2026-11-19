@@ -18,6 +18,16 @@ export function minorUnits(currency: string): number {
   return digits
 }
 
+/** Currencies shown without decimals. Every other currency is capped at 2. */
+const ZERO_DECIMAL = new Set(['IDR', 'JPY'])
+const MAX_DISPLAY_DIGITS = 2
+
+/** Decimals used for display and input: IDR/JPY 0, everything else min(minor units, 2). */
+export function displayDigits(currency: string): number {
+  const code = currency.toUpperCase()
+  return ZERO_DECIMAL.has(code) ? 0 : Math.min(minorUnits(code), MAX_DISPLAY_DIGITS)
+}
+
 export interface FormatOptions {
   /** 'always' prefixes + for positives, 'exceptZero' hides the sign on zero. Default 'auto'. */
   signDisplay?: 'auto' | 'always' | 'exceptZero' | 'never'
@@ -34,14 +44,14 @@ export function format(
   currency: string,
   opts: FormatOptions = {},
 ): string {
-  const digits = minorUnits(currency)
+  const digits = displayDigits(currency)
   // Round with Decimal so the result is exact, then let Intl group the string.
   const rounded = toDecimal(amount).toDecimalPlaces(digits, Decimal.ROUND_HALF_UP).toFixed(digits)
   const nf = new Intl.NumberFormat(opts.locale ?? 'en-US', {
     style: opts.withoutSymbol ? 'decimal' : 'currency',
     currency: currency.toUpperCase(),
     ...(opts.compact
-      ? { notation: 'compact' as const, maximumFractionDigits: 1 }
+      ? { notation: 'compact' as const, maximumFractionDigits: MAX_DISPLAY_DIGITS }
       : { minimumFractionDigits: digits, maximumFractionDigits: digits }),
     signDisplay: opts.signDisplay ?? 'auto',
   })
@@ -56,7 +66,7 @@ export function format(
 export function parseInput(input: string, currency: string): string | null {
   const cleaned = input.replace(/[\s_]/g, '').replace(/,/g, '')
   if (!/^-?\d*\.?\d*$/.test(cleaned) || !/\d/.test(cleaned)) return null
-  const digits = minorUnits(currency)
+  const digits = displayDigits(currency)
   return toDecimal(cleaned === '.' ? '0' : cleaned)
     .toDecimalPlaces(digits, Decimal.ROUND_HALF_UP)
     .toFixed(digits)
