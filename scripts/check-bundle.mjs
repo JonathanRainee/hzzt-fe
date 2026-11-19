@@ -24,6 +24,12 @@ const css = assets.filter((f) => f.endsWith('.css'))
 const failures = []
 const rows = []
 
+// The charts chunk (d3 + our SVG charts) must only load on routes that show a chart,
+// so it must never be part of the initial load.
+const eagerCharts = js.filter((f) => /\/charts-/.test(f) && referenced.has(f))
+if (eagerCharts.length > 0)
+  failures.push(`charts chunk is loaded eagerly: ${eagerCharts.join(', ')}`)
+
 const initial = js.filter((f) => referenced.has(f))
 const initialSize = initial.reduce((sum, f) => sum + gz(f), 0)
 rows.push(['Initial JS', initialSize, BUDGET.initialJs])

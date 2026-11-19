@@ -329,7 +329,7 @@ F0 and F1 need no backend at all, so you can start today. From F3 onward each ph
 | F5 | Transactions, filters and transfers | F4, F6 | P8, P9 | Done (local e2e skipped, CI runs it; transfer to an investment is stubbed out until F7) |
 | F7 | Investments | F5 | P10 to P14 | Done (local e2e skipped, CI runs it; detail has no related-transactions list: the transactions API has no investment filter) |
 | F8 | Assets, net worth and goals | F7 | P15, P16 | Done (local e2e skipped, CI runs it; the net-worth chart arrives with F9) |
-| F9 | Dashboard and charts | F5, F8 | P17 | Backlog |
+| F9 | Dashboard and charts | F5, F8 | P17 | Done (local e2e skipped, CI runs it; the Home account card is gone, sign-out is on Profile) |
 | F10 | PWA, hardening and deployment | all | P19 | Backlog |
 
 **Milestones.** MF1 Foundation (F0 to F2), MF2 Money core (F3 to F6), MF3 Investments and net worth (F7, F8), MF4 Production (F9, F10).

@@ -36,6 +36,8 @@ export const queryKeys = {
     manualAsset: (id: string) => ['space', spaceId, 'manual-assets', 'one', id] as const,
     goal: (id: string) => ['space', spaceId, 'goals', id] as const,
     dashboard: () => ['space', spaceId, 'dashboard'] as const,
+    dashboardView: (view: string, params: unknown) =>
+      ['space', spaceId, 'dashboard', view, params] as const,
     goals: () => ['space', spaceId, 'goals'] as const,
   }),
 }

@@ -13,9 +13,9 @@ describe('signed in', () => {
     expect(screen.getByRole('navigation', { name: 'Primary' })).toBeInTheDocument()
   })
 
-  it('shows who is signed in and signs out back to /login', async () => {
-    const { router } = renderApp('/s/s-1')
-    expect(await screen.findByText('jane@example.com')).toBeInTheDocument()
+  it('signs out from the profile screen back to /login', async () => {
+    const { router } = renderApp('/settings/profile')
+    expect(await screen.findByDisplayValue('jane@example.com')).toBeInTheDocument()
     await userEvent.click(screen.getByRole('button', { name: 'Sign out' }))
     expect(await screen.findByRole('heading', { name: 'Welcome back' })).toBeInTheDocument()
     expect(router.state.location.pathname).toBe('/login')

@@ -9,6 +9,8 @@ interface AmountProps {
   /** Colour by sign (income green, expense red). Sign is always also shown as a glyph. */
   tone?: 'auto' | 'neutral'
   signDisplay?: FormatOptions['signDisplay']
+  /** Short form (1.3M) for tight spaces such as calendar cells. */
+  compact?: boolean
   className?: string
 }
 
@@ -21,6 +23,7 @@ export function Amount({
   currency,
   tone = 'neutral',
   signDisplay = 'auto',
+  compact,
   className,
 }: AmountProps) {
   const { masked } = usePrivacy()
@@ -48,7 +51,7 @@ export function Amount({
         className,
       )}
     >
-      {format(value, currency, { signDisplay })}
+      {format(value, currency, { signDisplay, compact })}
     </span>
   )
 }

@@ -23,6 +23,8 @@ export interface FormatOptions {
   signDisplay?: 'auto' | 'always' | 'exceptZero' | 'never'
   /** Drop the currency symbol and return only the grouped number. */
   withoutSymbol?: boolean
+  /** Short form for tight spaces (1.3M). Display only: it rounds, so never use it where exactness matters. */
+  compact?: boolean
   locale?: string
 }
 
@@ -38,8 +40,9 @@ export function format(
   const nf = new Intl.NumberFormat(opts.locale ?? 'en-US', {
     style: opts.withoutSymbol ? 'decimal' : 'currency',
     currency: currency.toUpperCase(),
-    minimumFractionDigits: digits,
-    maximumFractionDigits: digits,
+    ...(opts.compact
+      ? { notation: 'compact' as const, maximumFractionDigits: 1 }
+      : { minimumFractionDigits: digits, maximumFractionDigits: digits }),
     signDisplay: opts.signDisplay ?? 'auto',
   })
   // Intl.NumberFormat v3 formats decimal strings exactly (Node 22, evergreen browsers).
