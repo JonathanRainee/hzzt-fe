@@ -7,11 +7,13 @@ import { useDebounce } from '@/shared/hooks/useDebounce'
 import { Button } from '@/shared/ui/Button'
 import { EmptyState } from '@/shared/ui/EmptyState'
 import { Input } from '@/shared/ui/Input'
+import { useLayout } from '@/shared/ui/layout'
 import { PeriodPicker } from '@/shared/ui/PeriodPicker'
 import { Skeleton } from '@/shared/ui/Skeleton'
 import { DayGroupHeader, TransactionRow } from '@/shared/ui/TransactionRow'
 import { WarningsStrip } from '@/shared/ui/WarningsStrip'
 import { dayOf } from './datetime'
+import { FilterPanel } from './FilterPanel'
 import { activeFilterCount, filtersFromSearch, filtersToSearch, hasAnyFilter } from './filters'
 import { useDailySummary, useTransactions } from './hooks'
 import type { PendingTransaction } from './optimistic'
@@ -41,6 +43,7 @@ export function toRows(items: readonly PendingTransaction[]): Row[] {
 
 export function HistoryScreen() {
   const { space } = useSpace()
+  const { isWide } = useLayout()
   const search = useSearch({ from: '/_authed/s/$spaceId/history' })
   const navigate = useNavigate()
   const filters = useMemo(() => filtersFromSearch(search), [search])
@@ -88,147 +91,154 @@ export function HistoryScreen() {
   const filtered = hasAnyFilter(filters)
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-3">
-      <h1 className="text-xl font-semibold">History</h1>
+    <div className="mx-auto flex w-full max-w-[1400px] gap-6">
+      {isWide ? <FilterPanel /> : null}
+      <div className="flex min-w-0 flex-1 flex-col gap-3">
+        <h1 className="text-xl font-semibold">History</h1>
 
-      <div className="sticky top-14 z-20 -mx-4 flex flex-col gap-2 bg-bg px-4 py-2">
-        <div className="flex items-center gap-2">
-          <div className="relative flex-1">
-            <Search
-              aria-hidden
-              className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-label-tertiary"
-            />
-            <Input
-              type="search"
-              aria-label="Search transactions"
-              placeholder="Search"
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              className="pl-9"
-            />
+        <div className="sticky top-14 z-20 -mx-4 flex flex-col gap-2 bg-bg px-4 py-2 lg:top-0 lg:mx-0 lg:px-0">
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1">
+              <Search
+                aria-hidden
+                className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-label-tertiary"
+              />
+              <Input
+                type="search"
+                aria-label="Search transactions"
+                placeholder="Search"
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+            {isWide ? null : (
+              <Link
+                to="/s/$spaceId/history/filters"
+                params={{ spaceId: space.id }}
+                search={(prev) => prev}
+                aria-label={count > 0 ? `Filters, ${count} active` : 'Filters'}
+                className="relative inline-flex size-11 shrink-0 items-center justify-center rounded-full border border-border bg-surface-1"
+              >
+                <ListFilter aria-hidden className="size-5" />
+                {count > 0 ? (
+                  <span className="absolute -top-1 -right-1 flex size-5 items-center justify-center rounded-full bg-accent text-xs font-semibold text-accent-label">
+                    {count}
+                  </span>
+                ) : null}
+              </Link>
+            )}
           </div>
-          <Link
-            to="/s/$spaceId/history/filters"
-            params={{ spaceId: space.id }}
-            search={(prev) => prev}
-            aria-label={count > 0 ? `Filters, ${count} active` : 'Filters'}
-            className="relative inline-flex size-11 shrink-0 items-center justify-center rounded-full border border-border bg-surface-1"
-          >
-            <ListFilter aria-hidden className="size-5" />
-            {count > 0 ? (
-              <span className="absolute -top-1 -right-1 flex size-5 items-center justify-center rounded-full bg-accent text-xs font-semibold text-accent-label">
-                {count}
-              </span>
-            ) : null}
-          </Link>
+          {isWide ? null : (
+            <PeriodPicker
+              value={filters.period}
+              className="self-start"
+              onChange={(p) =>
+                navigate({
+                  to: '/s/$spaceId/history',
+                  params: { spaceId: space.id },
+                  search: filtersToSearch({ ...filters, period: p }),
+                  replace: true,
+                })
+              }
+            />
+          )}
         </div>
-        <PeriodPicker
-          value={filters.period}
-          className="self-start"
-          onChange={(p) =>
-            navigate({
-              to: '/s/$spaceId/history',
-              params: { spaceId: space.id },
-              search: filtersToSearch({ ...filters, period: p }),
-              replace: true,
-            })
-          }
-        />
-      </div>
 
-      <WarningsStrip warnings={summary.data?.warnings} />
+        <WarningsStrip warnings={summary.data?.warnings} />
 
-      {txns.isPending ? (
-        <div className="flex flex-col gap-2" aria-busy="true">
-          {Array.from({ length: 6 }, (_, i) => (
-            // biome-ignore lint/suspicious/noArrayIndexKey: fixed placeholder rows
-            <Skeleton key={i} className="h-14" />
-          ))}
-        </div>
-      ) : txns.isError ? (
-        <EmptyState
-          title="Couldn't load your history"
-          description="Check your connection and try again."
-          action={<Button onClick={() => void txns.refetch()}>Try again</Button>}
-        />
-      ) : items.length === 0 ? (
-        filters.q.trim() ? (
+        {txns.isPending ? (
+          <div className="flex flex-col gap-2" aria-busy="true">
+            {Array.from({ length: 6 }, (_, i) => (
+              // biome-ignore lint/suspicious/noArrayIndexKey: fixed placeholder rows
+              <Skeleton key={i} className="h-14" />
+            ))}
+          </div>
+        ) : txns.isError ? (
           <EmptyState
-            title={`No results for “${filters.q.trim()}”`}
-            description="Try a different word, or clear the filters."
+            title="Couldn't load your history"
+            description="Check your connection and try again."
+            action={<Button onClick={() => void txns.refetch()}>Try again</Button>}
           />
-        ) : filtered ? (
-          <EmptyState
-            title="Nothing matches these filters"
-            description="Try a longer period or fewer filters."
-          />
+        ) : items.length === 0 ? (
+          filters.q.trim() ? (
+            <EmptyState
+              title={`No results for “${filters.q.trim()}”`}
+              description="Try a different word, or clear the filters."
+            />
+          ) : filtered ? (
+            <EmptyState
+              title="Nothing matches these filters"
+              description="Try a longer period or fewer filters."
+            />
+          ) : (
+            <EmptyState
+              title="No transactions yet"
+              description="Add your first expense or income to see it here."
+              action={
+                <Button asChild>
+                  <Link
+                    to="/s/$spaceId/transactions/new"
+                    params={{ spaceId: space.id }}
+                    search={{ type: 'EXPENSE' }}
+                  >
+                    Add transaction
+                  </Link>
+                </Button>
+              }
+            />
+          )
         ) : (
-          <EmptyState
-            title="No transactions yet"
-            description="Add your first expense or income to see it here."
-            action={
-              <Button asChild>
-                <Link
-                  to="/s/$spaceId/transactions/new"
-                  params={{ spaceId: space.id }}
-                  search={{ type: 'EXPENSE' }}
-                >
-                  Add transaction
-                </Link>
-              </Button>
-            }
-          />
-        )
-      ) : (
-        <div ref={listRef}>
-          <ul
-            aria-label="Transactions"
-            className="list-none"
-            style={{ height: virtualizer.getTotalSize(), position: 'relative' }}
-          >
-            {virtualItems.map((v) => {
-              const row = rows[v.index]
-              if (!row) return null
-              const day = row.kind === 'header' ? totals.get(row.date) : undefined
-              return (
-                <li
-                  key={row.key}
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: v.size,
-                    transform: `translateY(${v.start - virtualizer.options.scrollMargin}px)`,
-                  }}
-                >
-                  {row.kind === 'header' ? (
-                    <DayGroupHeader
-                      date={row.date}
-                      sticky={false}
-                      level={2}
-                      income={day?.income}
-                      expense={day?.expense}
-                      currency={summary.data?.currency}
-                    />
-                  ) : (
-                    <Link
-                      to="/s/$spaceId/transactions/$id"
-                      params={{ spaceId: space.id, id: row.txn.id as string }}
-                      className="block border-b border-border"
-                    >
-                      <TransactionRow transaction={row.txn} pending={row.txn.pending} />
-                    </Link>
-                  )}
-                </li>
-              )
-            })}
-          </ul>
-          {isFetchingNextPage ? <Skeleton className="mt-2 h-14" /> : null}
-        </div>
-      )}
+          <div ref={listRef}>
+            <ul
+              aria-label="Transactions"
+              className="list-none"
+              style={{ height: virtualizer.getTotalSize(), position: 'relative' }}
+            >
+              {virtualItems.map((v) => {
+                const row = rows[v.index]
+                if (!row) return null
+                const day = row.kind === 'header' ? totals.get(row.date) : undefined
+                return (
+                  <li
+                    key={row.key}
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: v.size,
+                      transform: `translateY(${v.start - virtualizer.options.scrollMargin}px)`,
+                    }}
+                  >
+                    {row.kind === 'header' ? (
+                      <DayGroupHeader
+                        date={row.date}
+                        sticky={false}
+                        level={2}
+                        income={day?.income}
+                        expense={day?.expense}
+                        currency={summary.data?.currency}
+                      />
+                    ) : (
+                      <Link
+                        to="/s/$spaceId/transactions/$id"
+                        params={{ spaceId: space.id, id: row.txn.id as string }}
+                        className="block border-b border-border"
+                      >
+                        <TransactionRow transaction={row.txn} pending={row.txn.pending} />
+                      </Link>
+                    )}
+                  </li>
+                )
+              })}
+            </ul>
+            {isFetchingNextPage ? <Skeleton className="mt-2 h-14" /> : null}
+          </div>
+        )}
 
-      <Outlet />
+        <Outlet />
+      </div>
     </div>
   )
 }

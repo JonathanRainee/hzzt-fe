@@ -2,6 +2,7 @@
 import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { HttpResponse, http } from 'msw'
+import { setMedia } from '../../../test/matchMedia'
 import { BASE, errorEnvelope, makeAuthedHandlers } from '../../../test/msw/api'
 import { seededExpense, seededIncome } from '../../../test/msw/categories'
 import { server } from '../../../test/msw/server'
@@ -803,5 +804,34 @@ describe('default date', () => {
     await user.click(await screen.findByRole('button', { name: 'Add transaction' }))
     const sheet = await screen.findByRole('dialog', { name: 'Add transaction' })
     expect(await within(sheet).findByLabelText('Date')).toHaveValue(localDate(new Date()))
+  })
+})
+
+describe('inline filter panel at 1024px+ (S3)', () => {
+  beforeEach(() => {
+    setMedia({ desktop: true, wide: true })
+    server.use(...makeAuthedHandlers())
+    server.use(
+      wallets,
+      categories,
+      http.get(T, () => HttpResponse.json({ items: [] })),
+    )
+  })
+  afterEach(() => setMedia({ desktop: false, wide: false }))
+
+  it('filters without a sheet: each choice updates the URL straight away', async () => {
+    const user = userEvent.setup()
+    const { router } = renderApp('/s/s-1/history')
+    const panel = await screen.findByTestId('filter-panel')
+    expect(screen.queryByRole('link', { name: 'Filters' })).not.toBeInTheDocument()
+    await user.click(within(panel).getByRole('button', { name: 'Last 7 days' }))
+    await waitFor(() =>
+      expect(router.state.location.search).toMatchObject({ period: 'LAST_7_DAYS' }),
+    )
+    await user.click(await within(panel).findByRole('button', { name: /Food/ }))
+    await waitFor(() =>
+      expect(router.state.location.search).toMatchObject({ categoryIds: ['e-0'] }),
+    )
+    expect(screen.queryByRole('dialog', { name: 'Filters' })).not.toBeInTheDocument()
   })
 })

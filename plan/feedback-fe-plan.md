@@ -18,7 +18,7 @@ Nov 19, 2026 · Planning only. Companion to `plan/plan.md` (conventions: feature
 - [x] S0 Formatting + tokens
 - [x] S1 Sharing redirect + shared-investment handling
 - [x] S2 Desktop layout system (done: PageGrid/Panel/CardGrid, side drawer at 1024+, icon rail, max-w-xl removed, Home 12-col grid, card grids for Categories/Goals/Wallets. Deferred: settings sub-nav, two-column forms with live preview, auth split panel, `toHaveScreenshot` baselines (S7))
-- [ ] S3 History + filters desktop
+- [x] S3 History + filters desktop (inline FilterPanel at 1024+, writes URL directly; the xl third-column edit panel is satisfied by the side drawer from S2, no separate panel)
 - [ ] S4 Wallets stack + display config
 - [ ] S5 Investments wrappers
 - [ ] S6 Assets page + bug test
