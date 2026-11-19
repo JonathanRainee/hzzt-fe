@@ -73,6 +73,11 @@ export const anonHandlers = [
   ),
 ]
 
+export const emptyWallets = {
+  items: [],
+  total: { total: '0' as unknown as number, currency: 'IDR', warnings: [] }, // the API sends a string
+} satisfies S['wallets.ListResponse']
+
 /** Signed-in handlers with overrides: who is active, which spaces exist, the preferences. */
 export function makeAuthedHandlers(
   opts: {
@@ -92,6 +97,7 @@ export function makeAuthedHandlers(
       HttpResponse.json(opts.preferences ?? defaultPreferences),
     ),
     http.get(`${BASE}/currencies`, () => HttpResponse.json(currencies)),
+    http.get(`${BASE}/spaces/:spaceId/wallets`, () => HttpResponse.json(emptyWallets)),
   ]
 }
 
@@ -104,4 +110,5 @@ export const authedHandlers = [
   http.post(`${BASE}/spaces/:spaceId/activate`, () => new HttpResponse(null, { status: 204 })),
   http.get(`${BASE}/me/preferences`, () => HttpResponse.json(defaultPreferences)),
   http.get(`${BASE}/currencies`, () => HttpResponse.json(currencies)),
+  http.get(`${BASE}/spaces/:spaceId/wallets`, () => HttpResponse.json(emptyWallets)),
 ]

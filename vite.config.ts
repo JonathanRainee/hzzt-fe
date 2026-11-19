@@ -15,7 +15,12 @@ export default defineConfig(({ mode }) => {
       react(),
       tailwindcss(),
       process.env.ANALYZE
-        ? visualizer({ filename: 'stats.html', gzipSize: true, open: false })
+        ? visualizer({
+            filename: process.env.ANALYZE === 'list' ? 'stats.txt' : 'stats.html',
+            template: process.env.ANALYZE === 'list' ? 'list' : 'treemap',
+            gzipSize: true,
+            open: false,
+          })
         : null,
     ],
     define: { __APP_VERSION__: JSON.stringify(process.env.npm_package_version ?? '0.0.0') },

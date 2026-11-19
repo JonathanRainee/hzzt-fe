@@ -27,7 +27,10 @@ import { Route as AuthedSettingsSpaceRouteImport } from './routes/_authed/settin
 import { Route as AuthedSSpaceIdIndexRouteImport } from './routes/_authed/s/$spaceId/index'
 import { Route as AuthedSSpaceIdAssetsRouteImport } from './routes/_authed/s/$spaceId/assets'
 import { Route as AuthedSSpaceIdHistoryRouteImport } from './routes/_authed/s/$spaceId/history'
-import { Route as AuthedSSpaceIdWalletsRouteImport } from './routes/_authed/s/$spaceId/wallets'
+import { Route as AuthedSSpaceIdWalletsIndexRouteImport } from './routes/_authed/s/$spaceId/wallets/index'
+import { Route as AuthedSSpaceIdWalletsIdIndexRouteImport } from './routes/_authed/s/$spaceId/wallets/$id/index'
+import { Route as AuthedSSpaceIdWalletsIdCardRouteImport } from './routes/_authed/s/$spaceId/wallets/$id/card'
+import { Route as AuthedSSpaceIdWalletsIdEditRouteImport } from './routes/_authed/s/$spaceId/wallets/$id/edit'
 
 const AuthedRoute = AuthedRouteImport.update({
   id: '/_authed',
@@ -117,11 +120,30 @@ const AuthedSSpaceIdHistoryRoute = AuthedSSpaceIdHistoryRouteImport.update({
   path: '/history',
   getParentRoute: () => AuthedSSpaceIdRouteRoute,
 } as any)
-const AuthedSSpaceIdWalletsRoute = AuthedSSpaceIdWalletsRouteImport.update({
-  id: '/wallets',
-  path: '/wallets',
-  getParentRoute: () => AuthedSSpaceIdRouteRoute,
-} as any)
+const AuthedSSpaceIdWalletsIndexRoute =
+  AuthedSSpaceIdWalletsIndexRouteImport.update({
+    id: '/wallets/',
+    path: '/wallets/',
+    getParentRoute: () => AuthedSSpaceIdRouteRoute,
+  } as any)
+const AuthedSSpaceIdWalletsIdIndexRoute =
+  AuthedSSpaceIdWalletsIdIndexRouteImport.update({
+    id: '/wallets/$id/',
+    path: '/wallets/$id/',
+    getParentRoute: () => AuthedSSpaceIdRouteRoute,
+  } as any)
+const AuthedSSpaceIdWalletsIdCardRoute =
+  AuthedSSpaceIdWalletsIdCardRouteImport.update({
+    id: '/wallets/$id/card',
+    path: '/wallets/$id/card',
+    getParentRoute: () => AuthedSSpaceIdRouteRoute,
+  } as any)
+const AuthedSSpaceIdWalletsIdEditRoute =
+  AuthedSSpaceIdWalletsIdEditRouteImport.update({
+    id: '/wallets/$id/edit',
+    path: '/wallets/$id/edit',
+    getParentRoute: () => AuthedSSpaceIdRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthedIndexRoute
@@ -139,8 +161,11 @@ export interface FileRoutesByFullPath {
   '/settings/': typeof AuthedSettingsIndexRoute
   '/s/$spaceId/assets': typeof AuthedSSpaceIdAssetsRoute
   '/s/$spaceId/history': typeof AuthedSSpaceIdHistoryRoute
-  '/s/$spaceId/wallets': typeof AuthedSSpaceIdWalletsRoute
   '/s/$spaceId/': typeof AuthedSSpaceIdIndexRoute
+  '/s/$spaceId/wallets/': typeof AuthedSSpaceIdWalletsIndexRoute
+  '/s/$spaceId/wallets/$id/card': typeof AuthedSSpaceIdWalletsIdCardRoute
+  '/s/$spaceId/wallets/$id/edit': typeof AuthedSSpaceIdWalletsIdEditRoute
+  '/s/$spaceId/wallets/$id/': typeof AuthedSSpaceIdWalletsIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/_gallery': typeof GalleryRoute
@@ -157,8 +182,11 @@ export interface FileRoutesByTo {
   '/settings': typeof AuthedSettingsIndexRoute
   '/s/$spaceId/assets': typeof AuthedSSpaceIdAssetsRoute
   '/s/$spaceId/history': typeof AuthedSSpaceIdHistoryRoute
-  '/s/$spaceId/wallets': typeof AuthedSSpaceIdWalletsRoute
   '/s/$spaceId': typeof AuthedSSpaceIdIndexRoute
+  '/s/$spaceId/wallets': typeof AuthedSSpaceIdWalletsIndexRoute
+  '/s/$spaceId/wallets/$id/card': typeof AuthedSSpaceIdWalletsIdCardRoute
+  '/s/$spaceId/wallets/$id/edit': typeof AuthedSSpaceIdWalletsIdEditRoute
+  '/s/$spaceId/wallets/$id': typeof AuthedSSpaceIdWalletsIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -179,8 +207,11 @@ export interface FileRoutesById {
   '/_authed/settings/': typeof AuthedSettingsIndexRoute
   '/_authed/s/$spaceId/assets': typeof AuthedSSpaceIdAssetsRoute
   '/_authed/s/$spaceId/history': typeof AuthedSSpaceIdHistoryRoute
-  '/_authed/s/$spaceId/wallets': typeof AuthedSSpaceIdWalletsRoute
   '/_authed/s/$spaceId/': typeof AuthedSSpaceIdIndexRoute
+  '/_authed/s/$spaceId/wallets/': typeof AuthedSSpaceIdWalletsIndexRoute
+  '/_authed/s/$spaceId/wallets/$id/card': typeof AuthedSSpaceIdWalletsIdCardRoute
+  '/_authed/s/$spaceId/wallets/$id/edit': typeof AuthedSSpaceIdWalletsIdEditRoute
+  '/_authed/s/$spaceId/wallets/$id/': typeof AuthedSSpaceIdWalletsIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -200,8 +231,11 @@ export interface FileRouteTypes {
     | '/settings/'
     | '/s/$spaceId/assets'
     | '/s/$spaceId/history'
-    | '/s/$spaceId/wallets'
     | '/s/$spaceId/'
+    | '/s/$spaceId/wallets/'
+    | '/s/$spaceId/wallets/$id/card'
+    | '/s/$spaceId/wallets/$id/edit'
+    | '/s/$spaceId/wallets/$id/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/_gallery'
@@ -218,8 +252,11 @@ export interface FileRouteTypes {
     | '/settings'
     | '/s/$spaceId/assets'
     | '/s/$spaceId/history'
-    | '/s/$spaceId/wallets'
     | '/s/$spaceId'
+    | '/s/$spaceId/wallets'
+    | '/s/$spaceId/wallets/$id/card'
+    | '/s/$spaceId/wallets/$id/edit'
+    | '/s/$spaceId/wallets/$id'
   id:
     | '__root__'
     | '/_authed'
@@ -239,8 +276,11 @@ export interface FileRouteTypes {
     | '/_authed/settings/'
     | '/_authed/s/$spaceId/assets'
     | '/_authed/s/$spaceId/history'
-    | '/_authed/s/$spaceId/wallets'
     | '/_authed/s/$spaceId/'
+    | '/_authed/s/$spaceId/wallets/'
+    | '/_authed/s/$spaceId/wallets/$id/card'
+    | '/_authed/s/$spaceId/wallets/$id/edit'
+    | '/_authed/s/$spaceId/wallets/$id/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -377,11 +417,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedSSpaceIdHistoryRouteImport
       parentRoute: typeof AuthedSSpaceIdRouteRoute
     }
-    '/_authed/s/$spaceId/wallets': {
-      id: '/_authed/s/$spaceId/wallets'
+    '/_authed/s/$spaceId/wallets/': {
+      id: '/_authed/s/$spaceId/wallets/'
       path: '/wallets'
-      fullPath: '/s/$spaceId/wallets'
-      preLoaderRoute: typeof AuthedSSpaceIdWalletsRouteImport
+      fullPath: '/s/$spaceId/wallets/'
+      preLoaderRoute: typeof AuthedSSpaceIdWalletsIndexRouteImport
+      parentRoute: typeof AuthedSSpaceIdRouteRoute
+    }
+    '/_authed/s/$spaceId/wallets/$id/': {
+      id: '/_authed/s/$spaceId/wallets/$id/'
+      path: '/wallets/$id'
+      fullPath: '/s/$spaceId/wallets/$id/'
+      preLoaderRoute: typeof AuthedSSpaceIdWalletsIdIndexRouteImport
+      parentRoute: typeof AuthedSSpaceIdRouteRoute
+    }
+    '/_authed/s/$spaceId/wallets/$id/card': {
+      id: '/_authed/s/$spaceId/wallets/$id/card'
+      path: '/wallets/$id/card'
+      fullPath: '/s/$spaceId/wallets/$id/card'
+      preLoaderRoute: typeof AuthedSSpaceIdWalletsIdCardRouteImport
+      parentRoute: typeof AuthedSSpaceIdRouteRoute
+    }
+    '/_authed/s/$spaceId/wallets/$id/edit': {
+      id: '/_authed/s/$spaceId/wallets/$id/edit'
+      path: '/wallets/$id/edit'
+      fullPath: '/s/$spaceId/wallets/$id/edit'
+      preLoaderRoute: typeof AuthedSSpaceIdWalletsIdEditRouteImport
       parentRoute: typeof AuthedSSpaceIdRouteRoute
     }
   }
@@ -390,15 +451,21 @@ declare module '@tanstack/react-router' {
 interface AuthedSSpaceIdRouteRouteChildren {
   AuthedSSpaceIdAssetsRoute: typeof AuthedSSpaceIdAssetsRoute
   AuthedSSpaceIdHistoryRoute: typeof AuthedSSpaceIdHistoryRoute
-  AuthedSSpaceIdWalletsRoute: typeof AuthedSSpaceIdWalletsRoute
   AuthedSSpaceIdIndexRoute: typeof AuthedSSpaceIdIndexRoute
+  AuthedSSpaceIdWalletsIndexRoute: typeof AuthedSSpaceIdWalletsIndexRoute
+  AuthedSSpaceIdWalletsIdCardRoute: typeof AuthedSSpaceIdWalletsIdCardRoute
+  AuthedSSpaceIdWalletsIdEditRoute: typeof AuthedSSpaceIdWalletsIdEditRoute
+  AuthedSSpaceIdWalletsIdIndexRoute: typeof AuthedSSpaceIdWalletsIdIndexRoute
 }
 
 const AuthedSSpaceIdRouteRouteChildren: AuthedSSpaceIdRouteRouteChildren = {
   AuthedSSpaceIdAssetsRoute: AuthedSSpaceIdAssetsRoute,
   AuthedSSpaceIdHistoryRoute: AuthedSSpaceIdHistoryRoute,
-  AuthedSSpaceIdWalletsRoute: AuthedSSpaceIdWalletsRoute,
   AuthedSSpaceIdIndexRoute: AuthedSSpaceIdIndexRoute,
+  AuthedSSpaceIdWalletsIndexRoute: AuthedSSpaceIdWalletsIndexRoute,
+  AuthedSSpaceIdWalletsIdCardRoute: AuthedSSpaceIdWalletsIdCardRoute,
+  AuthedSSpaceIdWalletsIdEditRoute: AuthedSSpaceIdWalletsIdEditRoute,
+  AuthedSSpaceIdWalletsIdIndexRoute: AuthedSSpaceIdWalletsIdIndexRoute,
 }
 
 const AuthedSSpaceIdRouteRouteWithChildren =
