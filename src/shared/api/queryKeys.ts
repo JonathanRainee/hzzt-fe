@@ -7,6 +7,7 @@ export const queryKeys = {
   preferences: () => ['me', 'preferences'] as const,
   spaces: () => ['spaces'] as const,
   currencies: () => ['currencies'] as const,
+  categorySuggestions: (type: string) => ['category-suggestions', type] as const,
   walletCardPresets: () => ['wallet-card-presets'] as const,
   walletCardTemplates: () => ['wallet-card-templates'] as const,
   space: (spaceId: string) => ({
@@ -15,6 +16,9 @@ export const queryKeys = {
     members: () => ['space', spaceId, 'members'] as const,
     invitation: () => ['space', spaceId, 'invitation'] as const,
     manualRates: () => ['space', spaceId, 'manual-rates'] as const,
+    categories: (type?: string, stats?: boolean) =>
+      ['space', spaceId, 'categories', type, stats] as const,
+    categoriesAll: () => ['space', spaceId, 'categories'] as const,
     wallets: () => ['space', spaceId, 'wallets'] as const,
     wallet: (id: string) => ['space', spaceId, 'wallets', id] as const,
     transactions: (filters?: unknown) => ['space', spaceId, 'transactions', filters] as const,

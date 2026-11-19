@@ -26,6 +26,7 @@ import { Route as AuthedSettingsSecurityRouteImport } from './routes/_authed/set
 import { Route as AuthedSettingsSpaceRouteImport } from './routes/_authed/settings/space'
 import { Route as AuthedSSpaceIdIndexRouteImport } from './routes/_authed/s/$spaceId/index'
 import { Route as AuthedSSpaceIdAssetsRouteImport } from './routes/_authed/s/$spaceId/assets'
+import { Route as AuthedSSpaceIdCategoriesRouteImport } from './routes/_authed/s/$spaceId/categories'
 import { Route as AuthedSSpaceIdHistoryRouteImport } from './routes/_authed/s/$spaceId/history'
 import { Route as AuthedSSpaceIdWalletsIndexRouteImport } from './routes/_authed/s/$spaceId/wallets/index'
 import { Route as AuthedSSpaceIdWalletsIdIndexRouteImport } from './routes/_authed/s/$spaceId/wallets/$id/index'
@@ -115,6 +116,12 @@ const AuthedSSpaceIdAssetsRoute = AuthedSSpaceIdAssetsRouteImport.update({
   path: '/assets',
   getParentRoute: () => AuthedSSpaceIdRouteRoute,
 } as any)
+const AuthedSSpaceIdCategoriesRoute =
+  AuthedSSpaceIdCategoriesRouteImport.update({
+    id: '/categories',
+    path: '/categories',
+    getParentRoute: () => AuthedSSpaceIdRouteRoute,
+  } as any)
 const AuthedSSpaceIdHistoryRoute = AuthedSSpaceIdHistoryRouteImport.update({
   id: '/history',
   path: '/history',
@@ -160,6 +167,7 @@ export interface FileRoutesByFullPath {
   '/settings/space': typeof AuthedSettingsSpaceRoute
   '/settings/': typeof AuthedSettingsIndexRoute
   '/s/$spaceId/assets': typeof AuthedSSpaceIdAssetsRoute
+  '/s/$spaceId/categories': typeof AuthedSSpaceIdCategoriesRoute
   '/s/$spaceId/history': typeof AuthedSSpaceIdHistoryRoute
   '/s/$spaceId/': typeof AuthedSSpaceIdIndexRoute
   '/s/$spaceId/wallets/': typeof AuthedSSpaceIdWalletsIndexRoute
@@ -181,6 +189,7 @@ export interface FileRoutesByTo {
   '/settings/space': typeof AuthedSettingsSpaceRoute
   '/settings': typeof AuthedSettingsIndexRoute
   '/s/$spaceId/assets': typeof AuthedSSpaceIdAssetsRoute
+  '/s/$spaceId/categories': typeof AuthedSSpaceIdCategoriesRoute
   '/s/$spaceId/history': typeof AuthedSSpaceIdHistoryRoute
   '/s/$spaceId': typeof AuthedSSpaceIdIndexRoute
   '/s/$spaceId/wallets': typeof AuthedSSpaceIdWalletsIndexRoute
@@ -206,6 +215,7 @@ export interface FileRoutesById {
   '/_authed/settings/space': typeof AuthedSettingsSpaceRoute
   '/_authed/settings/': typeof AuthedSettingsIndexRoute
   '/_authed/s/$spaceId/assets': typeof AuthedSSpaceIdAssetsRoute
+  '/_authed/s/$spaceId/categories': typeof AuthedSSpaceIdCategoriesRoute
   '/_authed/s/$spaceId/history': typeof AuthedSSpaceIdHistoryRoute
   '/_authed/s/$spaceId/': typeof AuthedSSpaceIdIndexRoute
   '/_authed/s/$spaceId/wallets/': typeof AuthedSSpaceIdWalletsIndexRoute
@@ -230,6 +240,7 @@ export interface FileRouteTypes {
     | '/settings/space'
     | '/settings/'
     | '/s/$spaceId/assets'
+    | '/s/$spaceId/categories'
     | '/s/$spaceId/history'
     | '/s/$spaceId/'
     | '/s/$spaceId/wallets/'
@@ -251,6 +262,7 @@ export interface FileRouteTypes {
     | '/settings/space'
     | '/settings'
     | '/s/$spaceId/assets'
+    | '/s/$spaceId/categories'
     | '/s/$spaceId/history'
     | '/s/$spaceId'
     | '/s/$spaceId/wallets'
@@ -275,6 +287,7 @@ export interface FileRouteTypes {
     | '/_authed/settings/space'
     | '/_authed/settings/'
     | '/_authed/s/$spaceId/assets'
+    | '/_authed/s/$spaceId/categories'
     | '/_authed/s/$spaceId/history'
     | '/_authed/s/$spaceId/'
     | '/_authed/s/$spaceId/wallets/'
@@ -410,6 +423,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedSSpaceIdAssetsRouteImport
       parentRoute: typeof AuthedSSpaceIdRouteRoute
     }
+    '/_authed/s/$spaceId/categories': {
+      id: '/_authed/s/$spaceId/categories'
+      path: '/categories'
+      fullPath: '/s/$spaceId/categories'
+      preLoaderRoute: typeof AuthedSSpaceIdCategoriesRouteImport
+      parentRoute: typeof AuthedSSpaceIdRouteRoute
+    }
     '/_authed/s/$spaceId/history': {
       id: '/_authed/s/$spaceId/history'
       path: '/history'
@@ -450,6 +470,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthedSSpaceIdRouteRouteChildren {
   AuthedSSpaceIdAssetsRoute: typeof AuthedSSpaceIdAssetsRoute
+  AuthedSSpaceIdCategoriesRoute: typeof AuthedSSpaceIdCategoriesRoute
   AuthedSSpaceIdHistoryRoute: typeof AuthedSSpaceIdHistoryRoute
   AuthedSSpaceIdIndexRoute: typeof AuthedSSpaceIdIndexRoute
   AuthedSSpaceIdWalletsIndexRoute: typeof AuthedSSpaceIdWalletsIndexRoute
@@ -460,6 +481,7 @@ interface AuthedSSpaceIdRouteRouteChildren {
 
 const AuthedSSpaceIdRouteRouteChildren: AuthedSSpaceIdRouteRouteChildren = {
   AuthedSSpaceIdAssetsRoute: AuthedSSpaceIdAssetsRoute,
+  AuthedSSpaceIdCategoriesRoute: AuthedSSpaceIdCategoriesRoute,
   AuthedSSpaceIdHistoryRoute: AuthedSSpaceIdHistoryRoute,
   AuthedSSpaceIdIndexRoute: AuthedSSpaceIdIndexRoute,
   AuthedSSpaceIdWalletsIndexRoute: AuthedSSpaceIdWalletsIndexRoute,

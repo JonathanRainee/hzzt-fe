@@ -27,7 +27,20 @@ interface FakeTxn {
   occurredAt: string
 }
 
+interface FakeCategory {
+  id: string
+  name: string
+  type: 'EXPENSE' | 'INCOME'
+  icon: string
+  color: string
+  sortOrder: number
+  budgetAmount?: string
+  /** Spend so far, set by the test to play the part of recorded transactions. */
+  spent: number
+}
+
 export interface FakeApi {
+  categories: FakeCategory[]
   wallets: FakeWallet[]
   transactions: FakeTxn[]
   calls: { refresh: number }
@@ -88,6 +101,7 @@ export async function installFakeApi(
     signedIn: opts.signedIn ?? false,
     calls: { refresh: 0 },
     activated: [],
+    categories: [],
     wallets: [],
     transactions: [],
     preferences: {
@@ -212,6 +226,62 @@ export async function installFakeApi(
         .filter((t) => ids.length === 0 || ids.includes(t.walletId))
         .map((t) => ({ ...t, wallet: { id: t.walletId, name: '' } }))
       return json(200, { items })
+    }
+    const cats = /^\/spaces\/([^/]+)\/categories(?:\/([^/]+))?$/.exec(path)
+    if (cats) {
+      const id = cats[2]
+      const view = (c: FakeCategory, stats: boolean) => ({
+        id: c.id,
+        name: c.name,
+        type: c.type,
+        icon: c.icon,
+        color: c.color,
+        sortOrder: c.sortOrder,
+        ...(c.budgetAmount ? { budgetAmount: c.budgetAmount, budgetCurrency: 'IDR' } : {}),
+        ...(stats
+          ? {
+              stats: {
+                currency: 'IDR',
+                spent: String(c.spent),
+                ...(c.budgetAmount
+                  ? {
+                      budgetRemaining: String(Number(c.budgetAmount) - c.spent),
+                      budgetUsedPct: ((c.spent / Number(c.budgetAmount)) * 100).toFixed(2),
+                    }
+                  : {}),
+              },
+            }
+          : {}),
+      })
+      if (!id && req.method() === 'GET') {
+        const url = new URL(req.url())
+        const type = url.searchParams.get('type')
+        const stats = url.searchParams.get('includeStats') === 'true'
+        return json(
+          200,
+          state.categories.filter((c) => !type || c.type === type).map((c) => view(c, stats)),
+        )
+      }
+      if (!id && req.method() === 'POST') {
+        const b = req.postDataJSON() as Partial<FakeCategory>
+        if (state.categories.some((c) => c.name === b.name && c.type === b.type))
+          return json(409, envelope('CATEGORY_NAME_TAKEN'))
+        const c: FakeCategory = {
+          id: `c-${state.categories.length + 1}`,
+          name: b.name ?? '',
+          type: b.type ?? 'EXPENSE',
+          icon: b.icon ?? '🏷️',
+          color: b.color ?? PALETTE[0],
+          sortOrder: state.categories.length,
+          spent: 0,
+          ...(b.budgetAmount ? { budgetAmount: b.budgetAmount } : {}),
+        }
+        state.categories.push(c)
+        return json(201, view(c, false))
+      }
+    }
+    if (req.method() === 'GET' && path === '/categories/suggestions') {
+      return json(200, ['Coffee', 'Groceries'])
     }
     if (req.method() === 'GET' && path === '/wallet-card-presets') {
       return json(200, [
