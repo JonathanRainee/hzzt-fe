@@ -18,6 +18,8 @@ export interface WalletCardProps {
   type: string
   cardStyle: CardStyleDTO | undefined
   isFavorite?: boolean
+  /** Per-user hide flags (all shown by default). The balance is always shown. */
+  display?: { hideLogo?: boolean; hideName?: boolean; hideType?: boolean }
   className?: string
 }
 
@@ -30,6 +32,7 @@ export function WalletCard({
   type,
   cardStyle,
   isFavorite,
+  display,
   className,
 }: WalletCardProps) {
   const { background, tone } = resolveCardStyle(cardStyle)
@@ -45,17 +48,21 @@ export function WalletCard({
     >
       <div className="flex items-start justify-between gap-2">
         <span className="flex items-center gap-2 font-semibold">
-          <span aria-hidden className="text-xl">
-            {icon}
-          </span>
-          <span className="truncate">{name}</span>
+          {display?.hideLogo ? null : (
+            <span aria-hidden className="text-xl">
+              {icon}
+            </span>
+          )}
+          {display?.hideName ? null : <span className="truncate">{name}</span>}
         </span>
         {isFavorite ? (
           <Star aria-label="Favourite" className="size-4 shrink-0 fill-current" />
         ) : null}
       </div>
       <div>
-        <p className="text-xs opacity-80">{TYPE_LABEL[type] ?? type}</p>
+        {display?.hideType ? null : (
+          <p className="text-xs opacity-80">{TYPE_LABEL[type] ?? type}</p>
+        )}
         <Amount value={balance} currency={currency} className="text-xl font-semibold" />
       </div>
     </div>

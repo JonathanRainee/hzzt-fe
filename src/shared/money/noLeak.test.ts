@@ -13,6 +13,7 @@ function walk(dir: string, out: string[] = []): string[] {
 
 // Input/calc code that needs exact Decimal strings, not display. Reviewed and allowed.
 const ALLOWED_TOFIXED = [
+  'src/shared/charts/pct.ts', // percent shares, not money
   'src/shared/money/',
   'src/features/investments/trade.ts',
   'src/features/investments/schema.ts',

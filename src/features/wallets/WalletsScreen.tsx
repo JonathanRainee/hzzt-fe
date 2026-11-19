@@ -1,18 +1,20 @@
-import { Link } from '@tanstack/react-router'
 import { ArrowDown, ArrowUp, Plus } from 'lucide-react'
 import { useState } from 'react'
 import { useSpace } from '@/app/providers/SpaceProvider'
 import { errorMessage } from '@/shared/api/errors'
+import { PieChart } from '@/shared/charts'
 import { Amount } from '@/shared/ui/Amount'
 import { Button } from '@/shared/ui/Button'
 import { Card } from '@/shared/ui/Card'
 import { EmptyState } from '@/shared/ui/EmptyState'
+import { PageGrid, Panel } from '@/shared/ui/PageGrid'
 import { Skeleton } from '@/shared/ui/Skeleton'
 import { useToast } from '@/shared/ui/Toast'
-import { WalletCard } from '@/shared/ui/WalletCard'
 import { WarningsStrip } from '@/shared/ui/WarningsStrip'
 import { CreateWalletSheet } from './CreateWalletSheet'
 import { moveItem, useReorderWallets, useWallets } from './hooks'
+import { walletPieSlices } from './pie'
+import { WalletStack } from './WalletStack'
 
 export function WalletsScreen() {
   const { space } = useSpace()
@@ -21,6 +23,8 @@ export function WalletsScreen() {
   const toast = useToast()
   const [creating, setCreating] = useState(false)
   const [reordering, setReordering] = useState(false)
+  const [expanded, setExpanded] = useState(false)
+  const pieSlices = walletPieSlices(wallets.data, space.baseCurrency)
 
   const move = (index: number, to: number) => {
     const items = wallets.data?.items ?? []
@@ -77,50 +81,50 @@ export function WalletsScreen() {
               action={<Button onClick={() => setCreating(true)}>Add wallet</Button>}
             />
           ) : (
-            <ul className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-              {wallets.data.items.map((w, i, all) => (
-                <li key={w.id} className="flex items-center gap-2">
-                  <Link
-                    to="/s/$spaceId/wallets/$id"
-                    params={{ spaceId: space.id, id: w.id as string }}
-                    aria-label={`${w.name}, open wallet`}
-                    className="min-w-0 flex-1"
-                  >
-                    <WalletCard
-                      name={w.name ?? ''}
-                      icon={w.icon ?? '💳'}
-                      balance={w.balance ?? '0'}
-                      currency={w.currency ?? ''}
-                      type={w.type ?? 'OTHER'}
-                      cardStyle={w.cardStyle}
-                      isFavorite={w.isFavorite}
-                    />
-                  </Link>
-                  {reordering ? (
-                    <div className="flex flex-col gap-1">
-                      <Button
-                        variant="secondary"
-                        size="icon"
-                        aria-label={`Move ${w.name} up`}
-                        disabled={i === 0}
-                        onClick={() => move(i, i - 1)}
-                      >
-                        <ArrowUp aria-hidden className="size-5" />
-                      </Button>
-                      <Button
-                        variant="secondary"
-                        size="icon"
-                        aria-label={`Move ${w.name} down`}
-                        disabled={i === all.length - 1}
-                        onClick={() => move(i, i + 1)}
-                      >
-                        <ArrowDown aria-hidden className="size-5" />
-                      </Button>
-                    </div>
-                  ) : null}
-                </li>
-              ))}
-            </ul>
+            <PageGrid>
+              <div className="min-w-0 lg:col-span-7">
+                <WalletStack
+                  wallets={wallets.data.items}
+                  spaceId={space.id}
+                  expanded={expanded}
+                  onExpandedChange={setExpanded}
+                  forceExpanded={reordering}
+                  renderAside={(w, i) =>
+                    reordering ? (
+                      <div className="flex flex-col gap-1">
+                        <Button
+                          variant="secondary"
+                          size="icon"
+                          aria-label={`Move ${w.name} up`}
+                          disabled={i === 0}
+                          onClick={() => move(i, i - 1)}
+                        >
+                          <ArrowUp aria-hidden className="size-5" />
+                        </Button>
+                        <Button
+                          variant="secondary"
+                          size="icon"
+                          aria-label={`Move ${w.name} down`}
+                          disabled={i === wallets.data.items.length - 1}
+                          onClick={() => move(i, i + 1)}
+                        >
+                          <ArrowDown aria-hidden className="size-5" />
+                        </Button>
+                      </div>
+                    ) : null
+                  }
+                />
+              </div>
+              <Panel span={5} aria-label="Balance share" className="self-start">
+                <h2 className="mb-3 text-base font-semibold">Share of balance</h2>
+                <PieChart
+                  slices={pieSlices}
+                  currency={wallets.data.total.currency || space.baseCurrency}
+                  label="Share of total balance per wallet"
+                  showAmounts={false}
+                />
+              </Panel>
+            </PageGrid>
           )}
         </>
       )}

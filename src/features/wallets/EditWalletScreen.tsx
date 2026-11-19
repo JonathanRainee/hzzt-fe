@@ -22,8 +22,10 @@ import { PageHeader } from '@/shared/ui/PageHeader'
 import { SegmentedControl } from '@/shared/ui/SegmentedControl'
 import { Select } from '@/shared/ui/Select'
 import { Skeleton } from '@/shared/ui/Skeleton'
+import { Switch } from '@/shared/ui/Switch'
 import { useToast } from '@/shared/ui/Toast'
 import { WALLET_TYPES } from './CreateWalletSheet'
+import { type DisplayPrefs, prefsOf, useWalletDisplay } from './display'
 import { useInvalidateMoney, useWallet, useWalletTransactions, type WalletDTO } from './hooks'
 
 const schema = z.object({
@@ -52,6 +54,7 @@ export function EditWalletScreen() {
       ) : (
         <>
           <DetailsForm key={wallet.data.id} wallet={wallet.data} />
+          <DisplaySection wallet={wallet.data} />
           <AdjustBalance wallet={wallet.data} />
         </>
       )}
@@ -263,6 +266,45 @@ function AdjustBalance({ wallet }: { wallet: WalletDTO }) {
           ? 'Saving…'
           : `Set balance${normalised ? ` to ${format(normalised, currency)}` : ''}`}
       </Button>
+    </section>
+  )
+}
+
+const DISPLAY_TOGGLES: Array<{ key: keyof DisplayPrefs; label: string }> = [
+  { key: 'hideLogo', label: 'Hide logo' },
+  { key: 'hideName', label: 'Hide name' },
+  { key: 'hideType', label: 'Hide type' },
+]
+
+/** Per-user card display flags, saved at once (synced across devices by the backend). */
+function DisplaySection({ wallet }: { wallet: WalletDTO }) {
+  const { space } = useSpace()
+  const toast = useToast()
+  const display = useWalletDisplay(space.id, wallet.id as string)
+  const prefs = prefsOf(wallet)
+  return (
+    <section className="flex flex-col gap-3" aria-label="Card display">
+      <h2 className="text-lg font-semibold">Card display</h2>
+      <p className="text-sm text-label-secondary">
+        Only you see these changes. They follow you across devices.
+      </p>
+      <Card className="flex flex-col divide-y divide-border p-0">
+        {DISPLAY_TOGGLES.map((t) => (
+          <div key={t.key} className="flex items-center justify-between px-4">
+            <span>{t.label}</span>
+            <Switch
+              aria-label={t.label}
+              checked={prefs[t.key]}
+              onCheckedChange={(checked) =>
+                display.mutate(
+                  { [t.key]: checked },
+                  { onError: (e) => toast.show(errorMessage(e), 'error') },
+                )
+              }
+            />
+          </div>
+        ))}
+      </Card>
     </section>
   )
 }

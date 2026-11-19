@@ -17,6 +17,7 @@ import { Skeleton } from '@/shared/ui/Skeleton'
 import { useToast } from '@/shared/ui/Toast'
 import { DayGroupHeader, TransactionRow } from '@/shared/ui/TransactionRow'
 import { WalletCard } from '@/shared/ui/WalletCard'
+import { prefsOf } from './display'
 import { useInvalidateMoney, useWallet, useWalletTransactions } from './hooks'
 import { TopUpSheet } from './TopUpSheet'
 
@@ -119,6 +120,7 @@ export function WalletDetailScreen() {
         type={w.type ?? 'OTHER'}
         cardStyle={w.cardStyle}
         isFavorite={w.isFavorite}
+        display={prefsOf(w)}
       />
       <p className="text-center text-sm text-label-secondary">
         Balance{' '}
