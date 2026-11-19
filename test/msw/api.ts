@@ -98,6 +98,11 @@ export function makeAuthedHandlers(
     ),
     http.get(`${BASE}/currencies`, () => HttpResponse.json(currencies)),
     http.get(`${BASE}/spaces/:spaceId/wallets`, () => HttpResponse.json(emptyWallets)),
+    http.get(`${BASE}/spaces/:spaceId/transactions`, () => HttpResponse.json({ items: [] })),
+    http.get(`${BASE}/spaces/:spaceId/transactions/daily-summary`, () =>
+      HttpResponse.json({ currency: 'IDR', items: [], warnings: [] }),
+    ),
+    http.get(`${BASE}/spaces/:spaceId/categories`, () => HttpResponse.json([])),
   ]
 }
 
@@ -111,4 +116,9 @@ export const authedHandlers = [
   http.get(`${BASE}/me/preferences`, () => HttpResponse.json(defaultPreferences)),
   http.get(`${BASE}/currencies`, () => HttpResponse.json(currencies)),
   http.get(`${BASE}/spaces/:spaceId/wallets`, () => HttpResponse.json(emptyWallets)),
+  http.get(`${BASE}/spaces/:spaceId/transactions`, () => HttpResponse.json({ items: [] })),
+  http.get(`${BASE}/spaces/:spaceId/transactions/daily-summary`, () =>
+    HttpResponse.json({ currency: 'IDR', items: [], warnings: [] }),
+  ),
+  http.get(`${BASE}/spaces/:spaceId/categories`, () => HttpResponse.json([])),
 ]

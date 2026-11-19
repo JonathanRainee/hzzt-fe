@@ -326,7 +326,7 @@ F0 and F1 need no backend at all, so you can start today. From F3 onward each ph
 | F3 | Spaces, settings, preferences and app lock | F2 | P3, P4, P5 | Done (local e2e skipped, CI runs it; Goals and Categories rows in Settings arrive with F8 and F6) |
 | F4 | Wallets and the card style editor | F3 | P7 | Done (local e2e skipped, CI runs it; PeriodPicker built here, not in F5; reorder uses up/down buttons; Transfer action added in F5) |
 | F6 | Categories and budgets | F3 | P6, P8 | Done (local e2e skipped, CI runs it; built before F5 as the dependency table orders it; reorder uses up/down buttons) |
-| F5 | Transactions, filters and transfers | F4, F6 | P8, P9 | Backlog |
+| F5 | Transactions, filters and transfers | F4, F6 | P8, P9 | Done (local e2e skipped, CI runs it; transfer to an investment is stubbed out until F7) |
 | F7 | Investments | F5 | P10 to P14 | Backlog |
 | F8 | Assets, net worth and goals | F7 | P15, P16 | Backlog |
 | F9 | Dashboard and charts | F5, F8 | P17 | Backlog |

@@ -50,6 +50,8 @@ export default defineConfig(({ mode }) => {
     },
     test: {
       environment: 'jsdom',
+      // Lazily imported routes are transformed on first use, so a long flow can exceed the 5s default.
+      testTimeout: 20000,
       env: { VITE_API_BASE_URL: 'http://localhost:8080/api/v1' },
       globals: true,
       setupFiles: ['./test/setup.ts'],

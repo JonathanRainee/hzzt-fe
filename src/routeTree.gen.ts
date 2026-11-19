@@ -27,7 +27,10 @@ import { Route as AuthedSettingsSpaceRouteImport } from './routes/_authed/settin
 import { Route as AuthedSSpaceIdIndexRouteImport } from './routes/_authed/s/$spaceId/index'
 import { Route as AuthedSSpaceIdAssetsRouteImport } from './routes/_authed/s/$spaceId/assets'
 import { Route as AuthedSSpaceIdCategoriesRouteImport } from './routes/_authed/s/$spaceId/categories'
-import { Route as AuthedSSpaceIdHistoryRouteImport } from './routes/_authed/s/$spaceId/history'
+import { Route as AuthedSSpaceIdHistoryRouteRouteImport } from './routes/_authed/s/$spaceId/history/route'
+import { Route as AuthedSSpaceIdHistoryFiltersRouteImport } from './routes/_authed/s/$spaceId/history/filters'
+import { Route as AuthedSSpaceIdTransactionsIdRouteImport } from './routes/_authed/s/$spaceId/transactions/$id'
+import { Route as AuthedSSpaceIdTransactionsNewRouteImport } from './routes/_authed/s/$spaceId/transactions/new'
 import { Route as AuthedSSpaceIdWalletsIndexRouteImport } from './routes/_authed/s/$spaceId/wallets/index'
 import { Route as AuthedSSpaceIdWalletsIdIndexRouteImport } from './routes/_authed/s/$spaceId/wallets/$id/index'
 import { Route as AuthedSSpaceIdWalletsIdCardRouteImport } from './routes/_authed/s/$spaceId/wallets/$id/card'
@@ -122,11 +125,30 @@ const AuthedSSpaceIdCategoriesRoute =
     path: '/categories',
     getParentRoute: () => AuthedSSpaceIdRouteRoute,
   } as any)
-const AuthedSSpaceIdHistoryRoute = AuthedSSpaceIdHistoryRouteImport.update({
-  id: '/history',
-  path: '/history',
-  getParentRoute: () => AuthedSSpaceIdRouteRoute,
-} as any)
+const AuthedSSpaceIdHistoryRouteRoute =
+  AuthedSSpaceIdHistoryRouteRouteImport.update({
+    id: '/history',
+    path: '/history',
+    getParentRoute: () => AuthedSSpaceIdRouteRoute,
+  } as any)
+const AuthedSSpaceIdHistoryFiltersRoute =
+  AuthedSSpaceIdHistoryFiltersRouteImport.update({
+    id: '/filters',
+    path: '/filters',
+    getParentRoute: () => AuthedSSpaceIdHistoryRouteRoute,
+  } as any)
+const AuthedSSpaceIdTransactionsIdRoute =
+  AuthedSSpaceIdTransactionsIdRouteImport.update({
+    id: '/transactions/$id',
+    path: '/transactions/$id',
+    getParentRoute: () => AuthedSSpaceIdRouteRoute,
+  } as any)
+const AuthedSSpaceIdTransactionsNewRoute =
+  AuthedSSpaceIdTransactionsNewRouteImport.update({
+    id: '/transactions/new',
+    path: '/transactions/new',
+    getParentRoute: () => AuthedSSpaceIdRouteRoute,
+  } as any)
 const AuthedSSpaceIdWalletsIndexRoute =
   AuthedSSpaceIdWalletsIndexRouteImport.update({
     id: '/wallets/',
@@ -166,10 +188,13 @@ export interface FileRoutesByFullPath {
   '/settings/security': typeof AuthedSettingsSecurityRoute
   '/settings/space': typeof AuthedSettingsSpaceRoute
   '/settings/': typeof AuthedSettingsIndexRoute
+  '/s/$spaceId/history': typeof AuthedSSpaceIdHistoryRouteRouteWithChildren
   '/s/$spaceId/assets': typeof AuthedSSpaceIdAssetsRoute
   '/s/$spaceId/categories': typeof AuthedSSpaceIdCategoriesRoute
-  '/s/$spaceId/history': typeof AuthedSSpaceIdHistoryRoute
   '/s/$spaceId/': typeof AuthedSSpaceIdIndexRoute
+  '/s/$spaceId/history/filters': typeof AuthedSSpaceIdHistoryFiltersRoute
+  '/s/$spaceId/transactions/$id': typeof AuthedSSpaceIdTransactionsIdRoute
+  '/s/$spaceId/transactions/new': typeof AuthedSSpaceIdTransactionsNewRoute
   '/s/$spaceId/wallets/': typeof AuthedSSpaceIdWalletsIndexRoute
   '/s/$spaceId/wallets/$id/card': typeof AuthedSSpaceIdWalletsIdCardRoute
   '/s/$spaceId/wallets/$id/edit': typeof AuthedSSpaceIdWalletsIdEditRoute
@@ -188,10 +213,13 @@ export interface FileRoutesByTo {
   '/settings/security': typeof AuthedSettingsSecurityRoute
   '/settings/space': typeof AuthedSettingsSpaceRoute
   '/settings': typeof AuthedSettingsIndexRoute
+  '/s/$spaceId/history': typeof AuthedSSpaceIdHistoryRouteRouteWithChildren
   '/s/$spaceId/assets': typeof AuthedSSpaceIdAssetsRoute
   '/s/$spaceId/categories': typeof AuthedSSpaceIdCategoriesRoute
-  '/s/$spaceId/history': typeof AuthedSSpaceIdHistoryRoute
   '/s/$spaceId': typeof AuthedSSpaceIdIndexRoute
+  '/s/$spaceId/history/filters': typeof AuthedSSpaceIdHistoryFiltersRoute
+  '/s/$spaceId/transactions/$id': typeof AuthedSSpaceIdTransactionsIdRoute
+  '/s/$spaceId/transactions/new': typeof AuthedSSpaceIdTransactionsNewRoute
   '/s/$spaceId/wallets': typeof AuthedSSpaceIdWalletsIndexRoute
   '/s/$spaceId/wallets/$id/card': typeof AuthedSSpaceIdWalletsIdCardRoute
   '/s/$spaceId/wallets/$id/edit': typeof AuthedSSpaceIdWalletsIdEditRoute
@@ -214,10 +242,13 @@ export interface FileRoutesById {
   '/_authed/settings/security': typeof AuthedSettingsSecurityRoute
   '/_authed/settings/space': typeof AuthedSettingsSpaceRoute
   '/_authed/settings/': typeof AuthedSettingsIndexRoute
+  '/_authed/s/$spaceId/history': typeof AuthedSSpaceIdHistoryRouteRouteWithChildren
   '/_authed/s/$spaceId/assets': typeof AuthedSSpaceIdAssetsRoute
   '/_authed/s/$spaceId/categories': typeof AuthedSSpaceIdCategoriesRoute
-  '/_authed/s/$spaceId/history': typeof AuthedSSpaceIdHistoryRoute
   '/_authed/s/$spaceId/': typeof AuthedSSpaceIdIndexRoute
+  '/_authed/s/$spaceId/history/filters': typeof AuthedSSpaceIdHistoryFiltersRoute
+  '/_authed/s/$spaceId/transactions/$id': typeof AuthedSSpaceIdTransactionsIdRoute
+  '/_authed/s/$spaceId/transactions/new': typeof AuthedSSpaceIdTransactionsNewRoute
   '/_authed/s/$spaceId/wallets/': typeof AuthedSSpaceIdWalletsIndexRoute
   '/_authed/s/$spaceId/wallets/$id/card': typeof AuthedSSpaceIdWalletsIdCardRoute
   '/_authed/s/$spaceId/wallets/$id/edit': typeof AuthedSSpaceIdWalletsIdEditRoute
@@ -239,10 +270,13 @@ export interface FileRouteTypes {
     | '/settings/security'
     | '/settings/space'
     | '/settings/'
+    | '/s/$spaceId/history'
     | '/s/$spaceId/assets'
     | '/s/$spaceId/categories'
-    | '/s/$spaceId/history'
     | '/s/$spaceId/'
+    | '/s/$spaceId/history/filters'
+    | '/s/$spaceId/transactions/$id'
+    | '/s/$spaceId/transactions/new'
     | '/s/$spaceId/wallets/'
     | '/s/$spaceId/wallets/$id/card'
     | '/s/$spaceId/wallets/$id/edit'
@@ -261,10 +295,13 @@ export interface FileRouteTypes {
     | '/settings/security'
     | '/settings/space'
     | '/settings'
+    | '/s/$spaceId/history'
     | '/s/$spaceId/assets'
     | '/s/$spaceId/categories'
-    | '/s/$spaceId/history'
     | '/s/$spaceId'
+    | '/s/$spaceId/history/filters'
+    | '/s/$spaceId/transactions/$id'
+    | '/s/$spaceId/transactions/new'
     | '/s/$spaceId/wallets'
     | '/s/$spaceId/wallets/$id/card'
     | '/s/$spaceId/wallets/$id/edit'
@@ -286,10 +323,13 @@ export interface FileRouteTypes {
     | '/_authed/settings/security'
     | '/_authed/settings/space'
     | '/_authed/settings/'
+    | '/_authed/s/$spaceId/history'
     | '/_authed/s/$spaceId/assets'
     | '/_authed/s/$spaceId/categories'
-    | '/_authed/s/$spaceId/history'
     | '/_authed/s/$spaceId/'
+    | '/_authed/s/$spaceId/history/filters'
+    | '/_authed/s/$spaceId/transactions/$id'
+    | '/_authed/s/$spaceId/transactions/new'
     | '/_authed/s/$spaceId/wallets/'
     | '/_authed/s/$spaceId/wallets/$id/card'
     | '/_authed/s/$spaceId/wallets/$id/edit'
@@ -434,7 +474,28 @@ declare module '@tanstack/react-router' {
       id: '/_authed/s/$spaceId/history'
       path: '/history'
       fullPath: '/s/$spaceId/history'
-      preLoaderRoute: typeof AuthedSSpaceIdHistoryRouteImport
+      preLoaderRoute: typeof AuthedSSpaceIdHistoryRouteRouteImport
+      parentRoute: typeof AuthedSSpaceIdRouteRoute
+    }
+    '/_authed/s/$spaceId/history/filters': {
+      id: '/_authed/s/$spaceId/history/filters'
+      path: '/filters'
+      fullPath: '/s/$spaceId/history/filters'
+      preLoaderRoute: typeof AuthedSSpaceIdHistoryFiltersRouteImport
+      parentRoute: typeof AuthedSSpaceIdHistoryRouteRoute
+    }
+    '/_authed/s/$spaceId/transactions/$id': {
+      id: '/_authed/s/$spaceId/transactions/$id'
+      path: '/transactions/$id'
+      fullPath: '/s/$spaceId/transactions/$id'
+      preLoaderRoute: typeof AuthedSSpaceIdTransactionsIdRouteImport
+      parentRoute: typeof AuthedSSpaceIdRouteRoute
+    }
+    '/_authed/s/$spaceId/transactions/new': {
+      id: '/_authed/s/$spaceId/transactions/new'
+      path: '/transactions/new'
+      fullPath: '/s/$spaceId/transactions/new'
+      preLoaderRoute: typeof AuthedSSpaceIdTransactionsNewRouteImport
       parentRoute: typeof AuthedSSpaceIdRouteRoute
     }
     '/_authed/s/$spaceId/wallets/': {
@@ -468,11 +529,27 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthedSSpaceIdHistoryRouteRouteChildren {
+  AuthedSSpaceIdHistoryFiltersRoute: typeof AuthedSSpaceIdHistoryFiltersRoute
+}
+
+const AuthedSSpaceIdHistoryRouteRouteChildren: AuthedSSpaceIdHistoryRouteRouteChildren =
+  {
+    AuthedSSpaceIdHistoryFiltersRoute: AuthedSSpaceIdHistoryFiltersRoute,
+  }
+
+const AuthedSSpaceIdHistoryRouteRouteWithChildren =
+  AuthedSSpaceIdHistoryRouteRoute._addFileChildren(
+    AuthedSSpaceIdHistoryRouteRouteChildren,
+  )
+
 interface AuthedSSpaceIdRouteRouteChildren {
+  AuthedSSpaceIdHistoryRouteRoute: typeof AuthedSSpaceIdHistoryRouteRouteWithChildren
   AuthedSSpaceIdAssetsRoute: typeof AuthedSSpaceIdAssetsRoute
   AuthedSSpaceIdCategoriesRoute: typeof AuthedSSpaceIdCategoriesRoute
-  AuthedSSpaceIdHistoryRoute: typeof AuthedSSpaceIdHistoryRoute
   AuthedSSpaceIdIndexRoute: typeof AuthedSSpaceIdIndexRoute
+  AuthedSSpaceIdTransactionsIdRoute: typeof AuthedSSpaceIdTransactionsIdRoute
+  AuthedSSpaceIdTransactionsNewRoute: typeof AuthedSSpaceIdTransactionsNewRoute
   AuthedSSpaceIdWalletsIndexRoute: typeof AuthedSSpaceIdWalletsIndexRoute
   AuthedSSpaceIdWalletsIdCardRoute: typeof AuthedSSpaceIdWalletsIdCardRoute
   AuthedSSpaceIdWalletsIdEditRoute: typeof AuthedSSpaceIdWalletsIdEditRoute
@@ -480,10 +557,12 @@ interface AuthedSSpaceIdRouteRouteChildren {
 }
 
 const AuthedSSpaceIdRouteRouteChildren: AuthedSSpaceIdRouteRouteChildren = {
+  AuthedSSpaceIdHistoryRouteRoute: AuthedSSpaceIdHistoryRouteRouteWithChildren,
   AuthedSSpaceIdAssetsRoute: AuthedSSpaceIdAssetsRoute,
   AuthedSSpaceIdCategoriesRoute: AuthedSSpaceIdCategoriesRoute,
-  AuthedSSpaceIdHistoryRoute: AuthedSSpaceIdHistoryRoute,
   AuthedSSpaceIdIndexRoute: AuthedSSpaceIdIndexRoute,
+  AuthedSSpaceIdTransactionsIdRoute: AuthedSSpaceIdTransactionsIdRoute,
+  AuthedSSpaceIdTransactionsNewRoute: AuthedSSpaceIdTransactionsNewRoute,
   AuthedSSpaceIdWalletsIndexRoute: AuthedSSpaceIdWalletsIndexRoute,
   AuthedSSpaceIdWalletsIdCardRoute: AuthedSSpaceIdWalletsIdCardRoute,
   AuthedSSpaceIdWalletsIdEditRoute: AuthedSSpaceIdWalletsIdEditRoute,

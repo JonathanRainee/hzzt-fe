@@ -36,9 +36,10 @@ describe('signed in', () => {
   })
 
   it('opens the add sheet from the centre add button', async () => {
-    renderApp('/s/s-1')
+    const { router } = renderApp('/s/s-1')
     await userEvent.click(await screen.findByRole('button', { name: 'Add transaction' }))
     expect(await screen.findByRole('dialog', { name: 'Add transaction' })).toBeInTheDocument()
+    expect(router.state.location.pathname).toBe('/s/s-1/transactions/new')
   })
 
   it('redirects away from /login to the active space home', async () => {

@@ -4,6 +4,7 @@ import {
   isValidDay,
   PERIOD_PRESETS,
   type Period,
+  parsePeriodSearch,
   periodFromSearch,
   periodsEqual,
   periodToApiQuery,
@@ -58,6 +59,13 @@ describe('period <-> search param round trip', () => {
     expect(validatePeriodSearch({ period: 'LAST_7_DAYS', evil: 'x' })).toEqual({
       period: 'LAST_7_DAYS',
     })
+  })
+
+  it('never writes the default into the URL: a plain link stays plain', () => {
+    expect(validatePeriodSearch({})).toEqual({})
+    expect(validatePeriodSearch({ period: 'EVERYTHING' })).toEqual({})
+    expect(parsePeriodSearch({})).toBeNull()
+    expect(parsePeriodSearch({ period: 'TODAY' })).toEqual({ kind: 'preset', preset: 'TODAY' })
   })
 
   it('maps to the API query the backend expects', () => {

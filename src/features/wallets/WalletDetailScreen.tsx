@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query'
 import { Link, useNavigate, useParams, useSearch } from '@tanstack/react-router'
-import { Ellipsis, Palette, Pencil, Plus, Star, Trash2 } from 'lucide-react'
+import { ArrowLeftRight, Ellipsis, Palette, Pencil, Plus, Star, Trash2 } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useSpace } from '@/app/providers/SpaceProvider'
 import { api } from '@/shared/api/client'
@@ -129,6 +129,16 @@ export function WalletDetailScreen() {
           <Plus aria-hidden className="size-5" />
           Add balance
         </Button>
+        <Button variant="secondary" className="flex-1" asChild>
+          <Link
+            to="/s/$spaceId/transactions/new"
+            params={{ spaceId: space.id }}
+            search={{ type: 'TRANSFER', from: id }}
+          >
+            <ArrowLeftRight aria-hidden className="size-5" />
+            Transfer
+          </Link>
+        </Button>
       </div>
 
       <section aria-labelledby="txn-heading" className="flex flex-col gap-2">
@@ -169,7 +179,13 @@ export function WalletDetailScreen() {
                 <ul className="divide-y divide-border">
                   {items.map((t) => (
                     <li key={t.id}>
-                      <TransactionRow transaction={t} />
+                      <Link
+                        to="/s/$spaceId/transactions/$id"
+                        params={{ spaceId: space.id, id: t.id as string }}
+                        className="block"
+                      >
+                        <TransactionRow transaction={t} />
+                      </Link>
                     </li>
                   ))}
                 </ul>

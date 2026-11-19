@@ -42,24 +42,32 @@ export function periodToSearch(p: Period): PeriodSearch {
 }
 
 /**
- * Parse (and sanitise) untrusted search params into a Period. A valid custom range wins
- * over a preset, as on the backend. Anything invalid falls back to the default.
+ * Parse untrusted search params into a Period, or null when none was given or it is invalid.
+ * A valid custom range wins over a preset, as on the backend; a reversed range is swapped.
  */
-export function periodFromSearch(search: object): Period {
+export function parsePeriodSearch(search: object): Period | null {
   const { from, to, period } = search as Record<string, unknown>
   if (typeof from === 'string' && typeof to === 'string' && isValidDay(from) && isValidDay(to)) {
     return from <= to ? { kind: 'range', from, to } : { kind: 'range', from: to, to: from }
   }
   if (isPreset(period)) return { kind: 'preset', preset: period }
-  return DEFAULT_PERIOD
+  return null
 }
 
-/** `validateSearch` for any route that carries a period. */
+/** The period in effect: what the URL says, else the default. */
+export function periodFromSearch(search: object): Period {
+  return parsePeriodSearch(search) ?? DEFAULT_PERIOD
+}
+
+/**
+ * `validateSearch` for any route that carries a period. Keeps only what was valid, and never
+ * writes the default into the URL, so a plain link stays plain.
+ */
 export function validatePeriodSearch(search: object): PeriodSearch {
-  return periodToSearch(periodFromSearch(search))
+  const p = parsePeriodSearch(search)
+  return p ? periodToSearch(p) : {}
 }
 
-/** Query params to send to the API for a period. */
 export function periodToApiQuery(p: Period): { period?: PeriodPreset; from?: string; to?: string } {
   return periodToSearch(p)
 }

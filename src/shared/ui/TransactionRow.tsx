@@ -24,9 +24,19 @@ export function signedAmount(t: TransactionDTO): string {
   return t.direction === 'OUT' && !amount.startsWith('-') ? `-${amount}` : amount
 }
 
-export function TransactionRow({ transaction: t }: { transaction: TransactionDTO }) {
+export function TransactionRow({
+  transaction: t,
+  pending,
+}: {
+  transaction: TransactionDTO
+  /** An optimistic row that the server has not confirmed yet. */
+  pending?: boolean
+}) {
   return (
-    <div className="flex min-h-14 items-center gap-3 py-2">
+    <div
+      data-pending={pending || undefined}
+      className={cn('flex h-16 items-center gap-3 py-2', pending && 'opacity-60')}
+    >
       <span
         aria-hidden
         style={t.category?.color ? { backgroundColor: t.category.color } : undefined}
@@ -40,8 +50,8 @@ export function TransactionRow({ transaction: t }: { transaction: TransactionDTO
       <div className="min-w-0 flex-1">
         <p className="truncate font-medium">{transactionTitle(t)}</p>
         <p className="truncate text-sm text-label-secondary">
-          {TYPE_LABEL[t.type ?? ''] ?? t.type}
-          {t.occurredAt ? ` · ${format(parseISO(t.occurredAt), 'HH:mm')}` : ''}
+          {pending ? 'Saving…' : (TYPE_LABEL[t.type ?? ''] ?? t.type)}
+          {!pending && t.occurredAt ? ` · ${format(parseISO(t.occurredAt), 'HH:mm')}` : ''}
         </p>
       </div>
       <Amount
@@ -54,11 +64,49 @@ export function TransactionRow({ transaction: t }: { transaction: TransactionDTO
   )
 }
 
-/** "Mon, 3 Nov" heading for a day's transactions. */
-export function DayGroupHeader({ date }: { date: string }) {
+interface DayGroupHeaderProps {
+  /** `YYYY-MM-DD` */
+  date: string
+  /** The day's totals from the daily summary, in `currency`. */
+  income?: string
+  expense?: string
+  currency?: string
+  sticky?: boolean
+}
+
+/** "Mon, 3 Nov" heading for a day's transactions, with the day's money in and out. */
+export function DayGroupHeader({
+  date,
+  income,
+  expense,
+  currency,
+  sticky = true,
+}: DayGroupHeaderProps) {
+  const hasTotals = currency && (income !== undefined || expense !== undefined)
   return (
-    <h3 className="sticky top-14 bg-bg py-2 text-sm font-semibold text-label-secondary">
-      {format(parseISO(date), 'EEE, d MMM')}
-    </h3>
+    <div
+      className={cn(
+        'flex h-11 items-center justify-between bg-bg text-sm',
+        sticky && 'sticky top-14',
+      )}
+    >
+      <h3 className="font-semibold text-label-secondary">
+        {format(parseISO(`${date}T12:00:00`), 'EEE, d MMM')}
+      </h3>
+      {hasTotals ? (
+        <p className="flex gap-3 text-label-secondary">
+          {income !== undefined && income !== '0' ? (
+            <span>
+              In <Amount value={income} currency={currency} className="text-positive" />
+            </span>
+          ) : null}
+          {expense !== undefined && expense !== '0' ? (
+            <span>
+              Out <Amount value={expense} currency={currency} className="text-negative" />
+            </span>
+          ) : null}
+        </p>
+      ) : null}
+    </div>
   )
 }

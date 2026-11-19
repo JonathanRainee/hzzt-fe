@@ -220,10 +220,111 @@ export async function installFakeApi(
         return json(201, state.transactions[0])
       }
     }
+    const txnRoute = /^\/spaces\/[^/]+\/(transactions|transfers)(?:\/([^/]+))?$/.exec(path)
+    if (txnRoute && !path.endsWith('daily-summary') && !(req.method() === 'GET' && !txnRoute[2])) {
+      const [, kind, tid] = txnRoute
+      const addTxn = (t: Omit<FakeTxn, 'id' | 'occurredAt'> & { occurredAt?: string }) => {
+        const row: FakeTxn = {
+          ...t,
+          id: `t-${state.transactions.length + 1}`,
+          occurredAt: t.occurredAt ?? new Date().toISOString(),
+        }
+        state.transactions.unshift(row)
+        return row
+      }
+      const wallet = (id: string) => state.wallets.find((w) => w.id === id)
+      if (!tid && req.method() === 'POST' && kind === 'transactions') {
+        const b = req.postDataJSON() as {
+          type: 'INCOME' | 'EXPENSE'
+          walletId: string
+          amount: string
+          occurredAt?: string
+          categoryId?: string
+          note?: string
+        }
+        const w = wallet(b.walletId)
+        if (!w) return json(404, envelope('NOT_FOUND'))
+        w.balance = String(Number(w.balance) + (b.type === 'INCOME' ? 1 : -1) * Number(b.amount))
+        const row = addTxn({
+          walletId: w.id,
+          type: b.type,
+          direction: b.type === 'INCOME' ? 'IN' : 'OUT',
+          amount: b.amount,
+          currency: w.currency,
+          title: b.note ?? '',
+          occurredAt: b.occurredAt,
+        })
+        return json(201, row)
+      }
+      if (!tid && req.method() === 'POST' && kind === 'transfers') {
+        const b = req.postDataJSON() as {
+          from: { walletId: string }
+          to: { walletId: string }
+          amount: string
+          toAmount?: string
+        }
+        const from = wallet(b.from.walletId)
+        const to = wallet(b.to.walletId)
+        if (!from || !to) return json(404, envelope('NOT_FOUND'))
+        if (from.id === to.id) return json(422, envelope('TRANSFER_SAME_WALLET'))
+        if (from.currency !== to.currency && !b.toAmount)
+          return json(422, envelope('TRANSFER_AMOUNT_REQUIRED'))
+        from.balance = String(Number(from.balance) - Number(b.amount))
+        to.balance = String(Number(to.balance) + Number(b.toAmount ?? b.amount))
+        const row = addTxn({
+          walletId: from.id,
+          type: 'TRANSFER',
+          direction: 'OUT',
+          amount: b.amount,
+          currency: from.currency,
+          title: 'Transfer',
+        })
+        return json(201, row)
+      }
+      const existing = state.transactions.find((t) => t.id === tid)
+      if (tid && existing && req.method() === 'GET')
+        return json(200, {
+          ...existing,
+          wallet: { id: existing.walletId, name: wallet(existing.walletId)?.name ?? '' },
+        })
+      if (tid && existing && req.method() === 'DELETE') {
+        const w = wallet(existing.walletId)
+        if (w)
+          w.balance = String(
+            Number(w.balance) + (existing.direction === 'IN' ? -1 : 1) * Number(existing.amount),
+          )
+        state.transactions = state.transactions.filter((t) => t.id !== tid)
+        return route.fulfill({ status: 204 })
+      }
+    }
+    if (req.method() === 'GET' && /^\/spaces\/[^/]+\/transactions\/daily-summary$/.test(path)) {
+      const days = new Map<string, { income: number; expense: number; count: number }>()
+      for (const t of state.transactions) {
+        const d = t.occurredAt.slice(0, 10)
+        const e = days.get(d) ?? { income: 0, expense: 0, count: 0 }
+        if (t.type === 'INCOME') e.income += Number(t.amount)
+        if (t.type === 'EXPENSE') e.expense += Number(t.amount)
+        e.count++
+        days.set(d, e)
+      }
+      return json(200, {
+        currency: 'IDR',
+        warnings: [],
+        items: [...days.entries()].map(([date, v]) => ({
+          date,
+          count: v.count,
+          income: String(v.income),
+          expense: String(v.expense),
+          transfer: '0',
+        })),
+      })
+    }
     if (req.method() === 'GET' && /^\/spaces\/[^/]+\/transactions$/.test(path)) {
       const ids = new URL(req.url()).searchParams.getAll('walletIds')
+      const q = new URL(req.url()).searchParams.get('q')?.toLowerCase()
       const items = state.transactions
         .filter((t) => ids.length === 0 || ids.includes(t.walletId))
+        .filter((t) => !q || t.title.toLowerCase().includes(q))
         .map((t) => ({ ...t, wallet: { id: t.walletId, name: '' } }))
       return json(200, { items })
     }
