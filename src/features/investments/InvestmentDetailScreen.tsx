@@ -27,6 +27,11 @@ function Line({ label, children }: { label: string; children: React.ReactNode })
   )
 }
 
+function isNotFound(e: unknown): boolean {
+  const err = toAppError(e)
+  return err.status === 404 || err.code === 'INVESTMENT_NOT_FOUND'
+}
+
 export function InvestmentDetailScreen() {
   const { space } = useSpace()
   const { id } = useParams({ from: '/_authed/s/$spaceId/investments/$id/' })
@@ -46,6 +51,21 @@ export function InvestmentDetailScreen() {
   }, [cooldown])
 
   if (investment.isPending) return <Skeleton className="mx-auto h-64 max-w-xl" />
+  if (investment.isError && isNotFound(investment.error)) {
+    return (
+      <div className="mx-auto max-w-xl">
+        <EmptyState
+          title="You no longer have access"
+          description="This investment was removed or is no longer shared with you."
+          action={
+            <Link to="/s/$spaceId/investments" params={{ spaceId: space.id }}>
+              <Button>Back to investments</Button>
+            </Link>
+          }
+        />
+      </div>
+    )
+  }
   if (investment.isError || !investment.data) {
     return (
       <div className="mx-auto max-w-xl">

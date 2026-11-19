@@ -413,12 +413,12 @@ describe('investment detail', () => {
     expect(screen.getByText(/read-only/)).toBeInTheDocument()
   })
 
-  it('shows an error state when the investment is missing', async () => {
+  it('shows the no-access state when the investment is missing (404)', async () => {
     server.use(
       http.get(`${I}/i-9`, () => HttpResponse.json(errorEnvelope('NOT_FOUND'), { status: 404 })),
     )
     renderApp('/s/s-1/investments/i-9')
-    expect(await screen.findByText("Couldn't load this investment")).toBeInTheDocument()
+    expect(await screen.findByText('You no longer have access')).toBeInTheDocument()
   })
 
   it('deletes after confirming', async () => {
@@ -631,6 +631,25 @@ describe('sharing', () => {
     )
   })
 
+  it('stays on the sharing page after saving, keeps the rows and shows a toast (S1)', async () => {
+    let listFetches = 0
+    server.use(
+      http.get(I, () => {
+        listFetches++
+        return HttpResponse.json(list([btc]))
+      }),
+      http.put(`${I}/i-1/participants`, () => HttpResponse.json({ items: participants })),
+    )
+    const user = userEvent.setup()
+    const { router } = renderApp('/s/s-1/investments/i-1/sharing')
+    await screen.findByLabelText('Jane share percent')
+    await user.click(screen.getByRole('button', { name: 'Save sharing' }))
+    expect(await screen.findByText('Sharing saved')).toBeInTheDocument()
+    await waitFor(() => expect(screen.getByLabelText('Jane share percent')).toHaveValue('100.00'))
+    expect(router.state.location.pathname).toBe('/s/s-1/investments/i-1/sharing')
+    expect(listFetches).toBeLessThanOrEqual(1)
+  })
+
   it('stops at 10 people', async () => {
     const user = userEvent.setup()
     renderApp('/s/s-1/investments/i-1/sharing')
@@ -659,6 +678,18 @@ describe('sharing', () => {
     renderApp('/s/s-1/investments/i-3/sharing')
     expect(await screen.findByText('Only the owner can change sharing')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Save sharing' })).not.toBeInTheDocument()
+  })
+})
+
+describe('investment access (S1)', () => {
+  it('shows "You no longer have access" on INVESTMENT_NOT_FOUND instead of a skeleton loop', async () => {
+    server.use(
+      http.get(`${I}/i-9`, () =>
+        HttpResponse.json(errorEnvelope('INVESTMENT_NOT_FOUND'), { status: 404 }),
+      ),
+    )
+    renderApp('/s/s-1/investments/i-9')
+    expect(await screen.findByText('You no longer have access')).toBeInTheDocument()
   })
 })
 

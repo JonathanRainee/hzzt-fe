@@ -105,6 +105,10 @@ test('share 50/50: 99.99% is blocked, exactly 100.00% saves', async ({ page }) =
   await expect(page.getByTestId('share-total')).toContainText('100.00%')
   await page.getByRole('button', { name: 'Save sharing' }).click()
   await expect.poll(() => api.investments[0]?.participants.length).toBe(2)
+  // S1: no redirect after saving; rows and toast stay (local-only, e2e does not run in CI).
+  await expect(page.getByText('Sharing saved')).toBeVisible()
+  await expect(page).toHaveURL(/\/investments\/i-1\/sharing$/)
+  await expect(page.getByLabel('Bob share percent')).toHaveValue('50')
 })
 
 test('portfolio list shows the server totals and an empty state', async ({ page }) => {

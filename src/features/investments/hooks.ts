@@ -203,8 +203,17 @@ export function useSetParticipants(id: string) {
         })
       ).data,
     meta: { silent: true },
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: queryKeys.space(space.id).investments() }),
+    // Narrow on purpose: a broad `investments()` prefix invalidation refetched every screen under the
+    // investments tree while the user was still on the sharing page. Only the list (exact), this
+    // investment and its participants can have changed.
+    onSuccess: async () => {
+      const keys = queryKeys.space(space.id)
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: keys.investments(), exact: true }),
+        queryClient.invalidateQueries({ queryKey: keys.investment(id), exact: true }),
+        queryClient.invalidateQueries({ queryKey: keys.participants(id), exact: true }),
+      ])
+    },
   })
 }
 

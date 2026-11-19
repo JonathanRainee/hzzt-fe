@@ -16,7 +16,7 @@ Nov 19, 2026 · Planning only. Companion to `plan/plan.md` (conventions: feature
 ## Status
 
 - [x] S0 Formatting + tokens
-- [ ] S1 Sharing redirect + shared-investment handling
+- [x] S1 Sharing redirect + shared-investment handling
 - [ ] S2 Desktop layout system
 - [ ] S3 History + filters desktop
 - [ ] S4 Wallets stack + display config
