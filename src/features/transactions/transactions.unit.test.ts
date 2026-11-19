@@ -209,7 +209,7 @@ describe('impliedRate', () => {
 })
 
 describe('invalidateMoney', () => {
-  it('invalidates wallets, transactions, net worth, dashboard and goals together, for one space only', async () => {
+  it('invalidates wallets, investments, transactions, net worth, dashboard and goals together, for one space only', async () => {
     const qc = new QueryClient()
     const keys = [
       ['space', 's-1', 'wallets'],
@@ -217,14 +217,15 @@ describe('invalidateMoney', () => {
       ['space', 's-1', 'net-worth'],
       ['space', 's-1', 'dashboard'],
       ['space', 's-1', 'goals'],
+      ['space', 's-1', 'investments'],
       ['space', 's-1', 'categories'],
       ['space', 's-2', 'wallets'],
     ]
     for (const k of keys) qc.setQueryData(k, 1)
     await invalidateMoney(qc, 's-1')
     const stale = (k: unknown[]) => qc.getQueryState(k)?.isInvalidated
-    for (const k of keys.slice(0, 5)) expect(stale(k), JSON.stringify(k)).toBe(true)
-    expect(stale(keys[5] as unknown[])).toBe(false) // categories are not money
-    expect(stale(keys[6] as unknown[])).toBe(false) // another space is untouched
+    for (const k of keys.slice(0, 6)) expect(stale(k), JSON.stringify(k)).toBe(true)
+    expect(stale(keys[6] as unknown[])).toBe(false) // categories are not money
+    expect(stale(keys[7] as unknown[])).toBe(false) // another space is untouched
   })
 })

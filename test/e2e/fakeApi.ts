@@ -1,5 +1,6 @@
 import type { Page } from '@playwright/test'
 import { PALETTE } from '../../src/shared/ui/palette'
+import { metas } from '../msw/investments'
 
 /**
  * A tiny stateful stand-in for the Go API, installed at the browser level so e2e
@@ -39,7 +40,22 @@ interface FakeCategory {
   spent: number
 }
 
+interface FakeInvestment {
+  id: string
+  name: string
+  symbol: string
+  icon: string
+  assetType: string
+  priceMode: string
+  quoteCurrency: string
+  quantity: string
+  avgBuyPrice: string
+  price: string
+  participants: Array<Record<string, unknown>>
+}
+
 export interface FakeApi {
+  investments: FakeInvestment[]
   categories: FakeCategory[]
   wallets: FakeWallet[]
   transactions: FakeTxn[]
@@ -101,6 +117,7 @@ export async function installFakeApi(
     signedIn: opts.signedIn ?? false,
     calls: { refresh: 0 },
     activated: [],
+    investments: [],
     categories: [],
     wallets: [],
     transactions: [],
@@ -328,6 +345,141 @@ export async function installFakeApi(
         .map((t) => ({ ...t, wallet: { id: t.walletId, name: '' } }))
       return json(200, { items })
     }
+    if (req.method() === 'GET' && path === '/investment-types') return json(200, metas)
+    if (req.method() === 'GET' && path === '/market/crypto/search') {
+      return json(200, [{ instrumentId: 'inst-btc', symbol: 'BTC', name: 'Bitcoin', rank: 1 }])
+    }
+    const invRoute = /^\/spaces\/[^/]+\/investments(?:\/([^/]+))?(?:\/(participants))?$/.exec(path)
+    if (invRoute) {
+      const [, iid, sub] = invRoute
+      const view = (i: FakeInvestment) => {
+        const value = Number(i.quantity) * Number(i.price)
+        const cost = Number(i.quantity) * Number(i.avgBuyPrice)
+        return {
+          id: i.id,
+          name: i.name,
+          symbol: i.symbol,
+          icon: i.icon,
+          assetType: i.assetType,
+          priceMode: i.priceMode,
+          quoteCurrency: i.quoteCurrency,
+          quantity: i.quantity,
+          avgBuyPrice: i.avgBuyPrice,
+          ownership: 'OWNER',
+          isShared: i.participants.length > 1,
+          myShareBps: 10000,
+          details: {},
+          valuation: {
+            price: i.price,
+            priceSource: 'MARKET',
+            priceAsOf: new Date().toISOString(),
+            isStale: false,
+            marketValue: String(value),
+            costBasis: String(cost),
+            unrealizedPl: String(value - cost),
+            unrealizedPlPct: cost ? (((value - cost) / cost) * 100).toFixed(2) : null,
+            base: null,
+            warnings: [],
+          },
+        }
+      }
+      if (!iid && req.method() === 'GET') {
+        const total = state.investments.reduce(
+          (n, i) => n + Number(i.quantity) * Number(i.price),
+          0,
+        )
+        return json(200, {
+          items: state.investments.map(view),
+          summary: {
+            currency: 'USD',
+            totalValue: String(total),
+            totalCost: String(total),
+            unrealizedPl: '0',
+            unrealizedPlPct: '0',
+            warnings: [],
+          },
+        })
+      }
+      if (!iid && req.method() === 'POST') {
+        const b = req.postDataJSON() as Partial<FakeInvestment> & { manualPrice?: string }
+        const i: FakeInvestment = {
+          id: `i-${state.investments.length + 1}`,
+          name: b.name ?? '',
+          symbol: b.symbol ?? '',
+          icon: b.icon ?? '🪙',
+          assetType: b.assetType ?? 'CRYPTO',
+          priceMode: b.priceMode ?? 'MANUAL',
+          quoteCurrency: 'USD',
+          quantity: b.quantity ?? '0',
+          avgBuyPrice: b.avgBuyPrice ?? '0',
+          price: b.manualPrice ?? '100',
+          participants: [
+            {
+              id: 'p-1',
+              role: 'OWNER',
+              displayName: 'Jane',
+              isMe: true,
+              sharePct: '100.00',
+              status: 'ACTIVE',
+            },
+          ],
+        }
+        state.investments.push(i)
+        return json(201, view(i))
+      }
+      const inv = state.investments.find((x) => x.id === iid)
+      if (!inv) return json(404, envelope('NOT_FOUND'))
+      if (!sub && req.method() === 'GET') return json(200, view(inv))
+      if (sub === 'participants' && req.method() === 'GET')
+        return json(200, { items: inv.participants })
+      if (sub === 'participants' && req.method() === 'PUT') {
+        const { participants } = req.postDataJSON() as { participants: Array<{ sharePct: string }> }
+        const sum = participants.reduce((n, p) => n + Math.round(Number(p.sharePct) * 100), 0)
+        if (sum !== 10000) return json(422, envelope('SHARE_TOTAL_INVALID'))
+        inv.participants = participants.map((p, k) => ({
+          id: `p-${k + 1}`,
+          ...p,
+          role: k === 0 ? 'OWNER' : 'PARTICIPANT',
+          status: 'ACTIVE',
+        }))
+        return json(200, { items: inv.participants })
+      }
+    }
+    if (req.method() === 'POST' && /^\/spaces\/[^/]+\/transfers$/.test(path)) {
+      const b = req.postDataJSON() as {
+        from: {
+          type: string
+          walletId?: string
+          investmentId?: string
+          quantity?: string
+          unitPrice?: string
+        }
+        to: {
+          type: string
+          walletId?: string
+          investmentId?: string
+          quantity?: string
+          unitPrice?: string
+        }
+      }
+      const trade = b.from.type === 'INVESTMENT' ? b.from : b.to.type === 'INVESTMENT' ? b.to : null
+      if (trade) {
+        const inv = state.investments.find((x) => x.id === trade.investmentId)
+        if (!inv) return json(404, envelope('NOT_FOUND'))
+        const dq = Number(trade.quantity)
+        const price = Number(trade.unitPrice)
+        if (b.from.type === 'INVESTMENT') {
+          if (dq > Number(inv.quantity)) return json(422, envelope('INSUFFICIENT_QUANTITY'))
+          inv.quantity = String(Number(inv.quantity) - dq)
+        } else {
+          const q = Number(inv.quantity)
+          inv.avgBuyPrice = String((q * Number(inv.avgBuyPrice) + dq * price) / (q + dq))
+          inv.quantity = String(q + dq)
+        }
+        return json(201, { id: 't-trade' })
+      }
+    }
+
     const cats = /^\/spaces\/([^/]+)\/categories(?:\/([^/]+))?$/.exec(path)
     if (cats) {
       const id = cats[2]
