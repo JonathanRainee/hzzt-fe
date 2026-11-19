@@ -16,6 +16,9 @@ const ALLOWED_TOFIXED = [
   'src/shared/charts/pct.ts', // percent shares, not money
   'src/shared/money/',
   'src/features/investments/trade.ts',
+  'src/features/investments/valuation.ts', // exact Decimal sums, rendered through Amount
+  'src/features/investments/wrappers.ts', // percent strings
+  'src/features/investments/WrapperPercentInline.tsx', // percent hint
   'src/features/investments/schema.ts',
   'src/features/investments/shares.ts',
   'src/features/investments/TradeSheet.tsx',

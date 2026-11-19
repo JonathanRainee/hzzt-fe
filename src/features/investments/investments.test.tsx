@@ -60,7 +60,7 @@ describe('portfolio list', () => {
     expect(within(stocks).getByText('BCA')).toBeInTheDocument()
     expect(within(crypto).getByText('+IDR 2,400,000')).toHaveClass('text-positive')
     expect(within(stocks).getByText('-IDR 100,000')).toHaveClass('text-negative')
-    expect(within(crypto).getByText('IDR 10,400,000')).toBeInTheDocument() // converted value
+    expect(within(crypto).getAllByText('IDR 10,400,000').length).toBeGreaterThan(0) // converted value
   })
 
   it('shows the portfolio warnings for assets without a rate', async () => {
@@ -94,8 +94,9 @@ describe('portfolio list', () => {
     )
     const user = userEvent.setup()
     renderApp('/s/s-1/investments')
-    expect(await screen.findByText('Bitcoin')).toBeInTheDocument()
-    expect(screen.getByText('IDR 10,400,000')).toBeInTheDocument() // the last known value is still shown
+    const crypto = await screen.findByRole('region', { name: 'Crypto' })
+    expect(within(crypto).getAllByText('Bitcoin').length).toBeGreaterThan(0)
+    expect(within(crypto).getAllByText('IDR 10,400,000').length).toBeGreaterThan(0) // the last known value is still shown
     const badge = screen.getByRole('button', { name: 'Stale price' })
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
     expect(badge).toHaveAttribute('title', expect.stringContaining('Price as of'))

@@ -51,6 +51,8 @@ interface FakeInvestment {
   quantity: string
   avgBuyPrice: string
   price: string
+  wrapper?: string
+  details?: Record<string, unknown>
   participants: Array<Record<string, unknown>>
 }
 
@@ -76,6 +78,8 @@ export interface FakeApi {
   assets: FakeAsset[]
   goals: FakeGoal[]
   investments: FakeInvestment[]
+  /** Wrapper targets, keyed `${assetType}/${wrapperKey}`. */
+  wrapperTargets: Record<string, string>
   categories: FakeCategory[]
   wallets: FakeWallet[]
   transactions: FakeTxn[]
@@ -140,6 +144,7 @@ export async function installFakeApi(
     assets: [],
     goals: [],
     investments: [],
+    wrapperTargets: {},
     categories: [],
     wallets: [],
     transactions: [],
@@ -514,6 +519,24 @@ export async function installFakeApi(
     if (req.method() === 'GET' && path === '/market/crypto/search') {
       return json(200, [{ instrumentId: 'inst-btc', symbol: 'BTC', name: 'Bitcoin', rank: 1 }])
     }
+    const wrapRoute = /^\/spaces\/[^/]+\/investments\/wrappers(?:\/([^/]+)\/([^/]+))?$/.exec(path)
+    if (wrapRoute) {
+      const [, type, key] = wrapRoute
+      if (req.method() === 'GET')
+        return json(200, {
+          items: Object.entries(state.wrapperTargets).map(([k, targetPct]) => {
+            const [assetType, wrapperKey] = k.split('/')
+            return { assetType, key: wrapperKey, targetPct }
+          }),
+        })
+      if (req.method() === 'PATCH' && type && key) {
+        const { targetPct } = req.postDataJSON() as { targetPct: string | null }
+        const id = `${type}/${decodeURIComponent(key)}`
+        if (targetPct === null) delete state.wrapperTargets[id]
+        else state.wrapperTargets[id] = targetPct
+        return json(200, { assetType: type, targetPct })
+      }
+    }
     const invRoute = /^\/spaces\/[^/]+\/investments(?:\/([^/]+))?(?:\/(participants))?$/.exec(path)
     if (invRoute) {
       const [, iid, sub] = invRoute
@@ -533,7 +556,8 @@ export async function installFakeApi(
           ownership: 'OWNER',
           isShared: i.participants.length > 1,
           myShareBps: 10000,
-          details: {},
+          wrapper: i.wrapper,
+          details: i.details ?? {},
           valuation: {
             price: i.price,
             priceSource: 'MARKET',
@@ -543,7 +567,13 @@ export async function installFakeApi(
             costBasis: String(cost),
             unrealizedPl: String(value - cost),
             unrealizedPlPct: cost ? (((value - cost) / cost) * 100).toFixed(2) : null,
-            base: null,
+            base: {
+              currency: i.quoteCurrency,
+              marketValue: String(value),
+              costBasis: String(cost),
+              unrealizedPl: String(value - cost),
+              fxRate: '1',
+            },
             warnings: [],
           },
         }

@@ -106,6 +106,9 @@ export function makeAuthedHandlers(
     ),
     http.get(`${BASE}/currencies`, () => HttpResponse.json(currencies)),
     http.get(`${BASE}/spaces/:spaceId/wallets`, () => HttpResponse.json(emptyWallets)),
+    http.get(`${BASE}/spaces/:spaceId/investments/wrappers`, () =>
+      HttpResponse.json({ items: [] }),
+    ),
     http.get(`${BASE}/spaces/:spaceId/transactions`, () => HttpResponse.json({ items: [] })),
     http.get(`${BASE}/spaces/:spaceId/transactions/daily-summary`, () =>
       HttpResponse.json({ currency: 'IDR', items: [], warnings: [] }),

@@ -1,21 +1,28 @@
 import { Link } from '@tanstack/react-router'
 import { Mail, Plus } from 'lucide-react'
+import { useMemo } from 'react'
 import { useSpace } from '@/app/providers/SpaceProvider'
+import { PieChart } from '@/shared/charts'
 import { Amount } from '@/shared/ui/Amount'
 import { Button } from '@/shared/ui/Button'
 import { Card } from '@/shared/ui/Card'
 import { EmptyState } from '@/shared/ui/EmptyState'
+import { Panel } from '@/shared/ui/PageGrid'
 import { PageHeader } from '@/shared/ui/PageHeader'
 import { Skeleton } from '@/shared/ui/Skeleton'
 import { WarningsStrip } from '@/shared/ui/WarningsStrip'
+import { CategoryPanel } from './CategoryPanel'
 import { useInvestments, useInvestmentTypes } from './hooks'
-import { InvestmentRow } from './InvestmentRow'
-import { groupInvestments } from './valuation'
+import { groupInvestments, topSlices } from './valuation'
+import { useWrapperTargets } from './wrappers'
 
 export function InvestmentsScreen() {
   const { space } = useSpace()
   const list = useInvestments(space.id)
   const types = useInvestmentTypes()
+  const targets = useWrapperTargets(space.id)
+  const groups = useMemo(() => groupInvestments(list.data?.items ?? []), [list.data])
+  const pieSlices = useMemo(() => topSlices(list.data?.items ?? []), [list.data])
   const label = (assetType: string) =>
     types.data?.find((t) => t.assetType === assetType)?.label ?? assetType
 
@@ -97,16 +104,29 @@ export function InvestmentsScreen() {
               }
             />
           ) : (
-            groupInvestments(list.data.items).map((g) => (
-              <section key={g.key} aria-label={label(g.assetType)} className="flex flex-col gap-2">
-                <h2 className="text-sm font-semibold tracking-wide text-label-secondary uppercase">
-                  {label(g.assetType)}
-                </h2>
-                {g.items.map((i) => (
-                  <InvestmentRow key={i.id} investment={i} spaceId={space.id} />
+            <>
+              {pieSlices.length > 0 ? (
+                <Panel span={12} aria-label="Portfolio split">
+                  <h2 className="mb-3 text-base font-semibold">Split by investment</h2>
+                  <PieChart
+                    slices={pieSlices}
+                    currency={list.data.summary.currency || space.baseCurrency}
+                    label="Portfolio split by investment"
+                  />
+                </Panel>
+              ) : null}
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                {groups.map((g) => (
+                  <CategoryPanel
+                    key={g.key}
+                    group={g}
+                    label={label(g.assetType)}
+                    spaceId={space.id}
+                    targets={targets.data?.items ?? []}
+                  />
                 ))}
-              </section>
-            ))
+              </div>
+            </>
           )}
         </>
       )}

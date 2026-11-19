@@ -73,6 +73,8 @@ export function buildTypeSchema(meta: TypeMeta) {
       estimatedAnnualChangePct: optionalDecimal,
       quoteCurrency: z.string(),
       purchaseDate: z.string().refine((v) => v === '' || isValidDay(v), 'Enter a valid date'),
+      /** Exchange, broker or platform holding it; empty lets the server derive it from details. */
+      wrapper: z.string().trim().max(60, 'Use at most 60 characters').optional(),
       fundingWalletId: z.string(),
       fundingAmount: optionalDecimal,
       details: z.object(detailShape),
@@ -156,6 +158,7 @@ export function toCreateBody(v: TypeFormValues, meta: TypeMeta): Record<string, 
   put('manualFxRate', v.manualFxRate)
   put('estimatedAnnualChangePct', v.estimatedAnnualChangePct)
   put('purchaseDate', v.purchaseDate)
+  if (v.wrapper?.trim()) body.wrapper = v.wrapper.trim()
   if (v.priceMode === 'MANUAL') put('manualPrice', v.manualPrice)
   if (v.priceMode === 'AUTO' && v.instrumentId) body.instrumentId = v.instrumentId
   if (meta.quoteCurrencyEditable && v.quoteCurrency) body.quoteCurrency = v.quoteCurrency

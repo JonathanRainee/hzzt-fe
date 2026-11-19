@@ -17,10 +17,16 @@ import { SegmentedControl } from '@/shared/ui/SegmentedControl'
 import { Select } from '@/shared/ui/Select'
 import { Skeleton } from '@/shared/ui/Skeleton'
 import { useToast } from '@/shared/ui/Toast'
-import { type InstrumentKind, useCreateInvestment, useInvestmentTypes } from './hooks'
+import {
+  type InstrumentKind,
+  useCreateInvestment,
+  useInvestments,
+  useInvestmentTypes,
+} from './hooks'
 import { type Instrument, InstrumentSearch } from './InstrumentSearch'
 import { buildTypeSchema, derivedShares, type TypeFormValues, toCreateBody } from './schema'
 import type { TypeMeta } from './types'
+import { groupInvestments, UNASSIGNED_KEY } from './valuation'
 
 const kindFor = (assetType: string): InstrumentKind =>
   assetType === 'CRYPTO' ? 'CRYPTO' : assetType === 'GLOBAL_ETF' ? 'ETF' : 'STOCK'
@@ -60,6 +66,61 @@ export function CreateInvestmentScreen() {
   )
 }
 
+const NEW_WRAPPER = '__new__'
+
+/** Pick an existing exchange/broker for this asset type, or type a new one inline. */
+function WrapperField({
+  assetType,
+  value,
+  onChange,
+  error,
+}: {
+  assetType: string
+  value: string
+  onChange: (v: string) => void
+  error?: string | undefined
+}) {
+  const { space } = useSpace()
+  const list = useInvestments(space.id)
+  const existing = useMemo(() => {
+    const g = groupInvestments(list.data?.items ?? []).find((x) => x.assetType === assetType)
+    return (g?.wrappers ?? []).filter((w) => w.key !== UNASSIGNED_KEY).map((w) => w.label)
+  }, [list.data, assetType])
+  const [creating, setCreating] = useState(false)
+  const selectValue = creating ? NEW_WRAPPER : existing.includes(value) ? value : ''
+  return (
+    <div className="flex flex-col gap-2">
+      <Field label="Exchange / broker (optional)" error={creating ? undefined : error}>
+        <Select
+          value={selectValue}
+          onChange={(e) => {
+            if (e.target.value === NEW_WRAPPER) {
+              setCreating(true)
+              onChange('')
+            } else {
+              setCreating(false)
+              onChange(e.target.value)
+            }
+          }}
+        >
+          <option value="">None</option>
+          {existing.map((w) => (
+            <option key={w} value={w}>
+              {w}
+            </option>
+          ))}
+          <option value={NEW_WRAPPER}>New wrapper…</option>
+        </Select>
+      </Field>
+      {creating ? (
+        <Field label="New wrapper name" error={error}>
+          <Input maxLength={60} value={value} onChange={(e) => onChange(e.target.value)} />
+        </Field>
+      ) : null}
+    </div>
+  )
+}
+
 function emptyValues(meta: TypeMeta): TypeFormValues {
   const details: Record<string, string> = {}
   for (const f of meta.detailFields ?? []) if (f.name) details[f.name] = ''
@@ -78,6 +139,7 @@ function emptyValues(meta: TypeMeta): TypeFormValues {
     estimatedAnnualChangePct: meta.defaults?.estimatedAnnualChangePct ?? '5.5',
     quoteCurrency: meta.quoteCurrency ?? '',
     purchaseDate: '',
+    wrapper: '',
     fundingWalletId: '',
     fundingAmount: '',
     details,
@@ -321,6 +383,13 @@ function TypeForm({ meta }: { meta: TypeMeta }) {
       >
         <Input inputMode="decimal" {...register('estimatedAnnualChangePct')} />
       </Field>
+
+      <WrapperField
+        assetType={meta.assetType as string}
+        value={useWatch({ control, name: 'wrapper' }) ?? ''}
+        onChange={(w) => setValue('wrapper', w, { shouldValidate: true })}
+        error={err.wrapper?.message}
+      />
 
       {(meta.detailFields ?? []).filter((f) => !lots || f.name !== 'lots').map(detailInput)}
 
