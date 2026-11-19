@@ -21,7 +21,7 @@ Nov 19, 2026 · Planning only. Companion to `plan/plan.md` (conventions: feature
 - [x] S3 History + filters desktop (inline FilterPanel at 1024+, writes URL directly; the xl third-column edit panel is satisfied by the side drawer from S2, no separate panel)
 - [x] S4 Wallets stack + display config (display prefs use `PATCH /spaces/{id}/wallets/{id}/display-prefs` and `displayPrefs` on the wallet DTO per the BE plan, via `looseApi` until `sync:api` brings them into the schema; pie uses `baseBalance`/`pctOfTotal` when present, else same-currency wallets only)
 - [x] S5 Investments wrappers (grouping is computed client-side from the flat list with Decimal, matching the BE rules, so it works before `GET .../investments/grouped` is consumed; targets via `GET/PATCH .../investments/wrappers` through `looseApi`, MSW-tested. Wrapper rename/delete menu is not built: the BE models the wrapper as a text field on investments with no wrapper CRUD endpoint; new wrappers are created from the Wrapper select on the create form. fakeApi now serves wrapper targets for local e2e)
-- [ ] S6 Assets page + bug test
+- [x] S6 Assets page + bug test (composed from wallets, investments and manual assets: `GET /assets/summary` is not in the BE swagger yet, so `AssetBreakdownList` is fed by the existing hooks. The shared-in open test runs against MSW; re-run it against the real BE once its fix lands)
 - [ ] S7 Polish
 
 ## 1. Current-state findings

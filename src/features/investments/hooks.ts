@@ -32,8 +32,9 @@ export interface InvestmentList {
 }
 
 /** Own and shared-in investments, valued for the viewer. Totals come from the server. */
-export function useInvestments(spaceId: string) {
+export function useInvestments(spaceId: string, enabled = true) {
   return useQuery({
+    enabled,
     queryKey: queryKeys.space(spaceId).investments(),
     refetchOnWindowFocus: true,
     queryFn: async (): Promise<InvestmentList> => {

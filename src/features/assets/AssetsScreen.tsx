@@ -2,6 +2,8 @@ import { Link } from '@tanstack/react-router'
 import { ChevronDown, Plus } from 'lucide-react'
 import { type ReactNode, useState } from 'react'
 import { useSpace } from '@/app/providers/SpaceProvider'
+import { useInvestments, useInvestmentTypes } from '@/features/investments/hooks'
+import { useWallets } from '@/shared/api/wallets'
 import { toMoneyString } from '@/shared/money'
 import { Amount } from '@/shared/ui/Amount'
 import { Button } from '@/shared/ui/Button'
@@ -10,6 +12,8 @@ import { EmptyState } from '@/shared/ui/EmptyState'
 import { Skeleton } from '@/shared/ui/Skeleton'
 import { StatCard } from '@/shared/ui/StatCard'
 import { WarningsStrip } from '@/shared/ui/WarningsStrip'
+import { AssetBreakdownList } from './AssetBreakdownList'
+import { cashGroups, investmentGroups } from './breakdown'
 import { useManualAssets, useNetWorthHistory, useNetWorthSummary } from './hooks'
 import { KINDS, type KindMeta } from './kinds'
 
@@ -90,34 +94,25 @@ function ManualSection({ meta, currency }: { meta: KindMeta; currency: string })
           {list.data.items.length === 0 ? (
             <p className="text-sm text-label-secondary">{meta.emptyText}</p>
           ) : (
-            <ul className="flex flex-col gap-2">
-              {list.data.items.map((a) => (
-                <li key={a.id}>
-                  <Link
-                    to="/s/$spaceId/assets/$id"
-                    params={{ spaceId: space.id, id: a.id as string }}
-                    className="flex min-h-14 items-center gap-3 rounded-md px-2 hover:bg-surface-3"
-                  >
-                    <span aria-hidden className="text-xl">
-                      {a.icon}
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate font-medium">{a.name}</span>
-                      {a.counterpartyName ? (
-                        <span className="block truncate text-sm text-label-secondary">
-                          {a.counterpartyName}
-                        </span>
-                      ) : null}
-                    </span>
-                    <Amount
-                      value={toMoneyString(a.currentValue)}
-                      currency={a.currency ?? currency}
-                      className="font-medium"
-                    />
-                  </Link>
-                </li>
-              ))}
-            </ul>
+            <AssetBreakdownList
+              groups={[
+                {
+                  key: meta.kind,
+                  rows: list.data.items.map((a) => ({
+                    key: a.id as string,
+                    icon: a.icon,
+                    name: a.name ?? '',
+                    sub: a.counterpartyName,
+                    value: toMoneyString(a.currentValue),
+                    currency: a.currency ?? currency,
+                    link: {
+                      to: '/s/$spaceId/assets/$id',
+                      params: { spaceId: space.id, id: a.id as string },
+                    },
+                  })),
+                },
+              ]}
+            />
           )}
         </>
       )}
@@ -130,6 +125,11 @@ export function AssetsScreen() {
   const summary = useNetWorthSummary(space.id)
   const history = useNetWorthHistory(space.id, '1M')
   const cashOnly = space.trackingMode === 'CASH_ONLY'
+  const wallets = useWallets(space.id)
+  const investments = useInvestments(space.id, !cashOnly)
+  const types = useInvestmentTypes()
+  const typeLabel = (assetType: string) =>
+    types.data?.find((t) => t.assetType === assetType)?.label ?? assetType
   const s = summary.data
   const change = history.data?.changePct
 
@@ -172,61 +172,75 @@ export function AssetsScreen() {
           />
           <WarningsStrip warnings={s.warnings} />
 
-          <Section
-            title="Cash"
-            total={s.cash}
-            currency={s.currency || space.baseCurrency}
-            action={
-              <Button variant="ghost" size="sm" asChild>
-                <Link to="/s/$spaceId/wallets" params={{ spaceId: space.id }}>
-                  Wallets
-                </Link>
-              </Button>
-            }
-          >
-            <p className="text-sm text-label-secondary">
-              Everything in your wallets, converted to {s.currency || space.baseCurrency}.
-            </p>
-          </Section>
+          <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
+            <Section
+              title="Cash"
+              total={s.cash}
+              currency={s.currency || space.baseCurrency}
+              action={
+                <Button variant="ghost" size="sm" asChild>
+                  <Link to="/s/$spaceId/wallets" params={{ spaceId: space.id }}>
+                    Wallets
+                  </Link>
+                </Button>
+              }
+            >
+              <p className="text-sm text-label-secondary">
+                Everything in your wallets, converted to {s.currency || space.baseCurrency}.
+              </p>
+              <AssetBreakdownList
+                groups={cashGroups(wallets.data?.items ?? [], space.id)}
+                empty={<p className="text-sm text-label-secondary">No wallets yet.</p>}
+              />
+            </Section>
 
-          {cashOnly ? null : (
-            <>
-              <Section
-                title="Investments"
-                total={s.investments?.value ?? '0'}
-                currency={s.currency || space.baseCurrency}
-                action={
-                  <Button variant="ghost" size="sm" asChild>
-                    <Link to="/s/$spaceId/investments" params={{ spaceId: space.id }}>
-                      Open
-                    </Link>
-                  </Button>
-                }
-              >
-                {s.investments ? (
-                  <p className="flex justify-between text-sm text-label-secondary">
-                    <span>
-                      Cost <Amount value={s.investments.cost} currency={s.currency} />
-                    </span>
-                    <span>
-                      <Amount
-                        value={s.investments.unrealizedPl}
-                        currency={s.currency}
-                        tone="auto"
-                        signDisplay="always"
-                      />
-                      {s.investments.unrealizedPlPct !== null ? (
-                        <> ({s.investments.unrealizedPlPct}%)</>
-                      ) : null}
-                    </span>
-                  </p>
-                ) : null}
-              </Section>
-              {KINDS.map((k) => (
-                <ManualSection key={k.kind} meta={k} currency={s.currency || space.baseCurrency} />
-              ))}
-            </>
-          )}
+            {cashOnly ? null : (
+              <>
+                <Section
+                  title="Investments"
+                  total={s.investments?.value ?? '0'}
+                  currency={s.currency || space.baseCurrency}
+                  action={
+                    <Button variant="ghost" size="sm" asChild>
+                      <Link to="/s/$spaceId/investments" params={{ spaceId: space.id }}>
+                        Open
+                      </Link>
+                    </Button>
+                  }
+                >
+                  {s.investments ? (
+                    <p className="flex justify-between text-sm text-label-secondary">
+                      <span>
+                        Cost <Amount value={s.investments.cost} currency={s.currency} />
+                      </span>
+                      <span>
+                        <Amount
+                          value={s.investments.unrealizedPl}
+                          currency={s.currency}
+                          tone="auto"
+                          signDisplay="always"
+                        />
+                        {s.investments.unrealizedPlPct !== null ? (
+                          <> ({s.investments.unrealizedPlPct}%)</>
+                        ) : null}
+                      </span>
+                    </p>
+                  ) : null}
+                  <AssetBreakdownList
+                    groups={investmentGroups(investments.data?.items ?? [], typeLabel, space.id)}
+                    empty={<p className="text-sm text-label-secondary">No investments yet.</p>}
+                  />
+                </Section>
+                {KINDS.map((k) => (
+                  <ManualSection
+                    key={k.kind}
+                    meta={k}
+                    currency={s.currency || space.baseCurrency}
+                  />
+                ))}
+              </>
+            )}
+          </div>
         </>
       )}
     </div>
