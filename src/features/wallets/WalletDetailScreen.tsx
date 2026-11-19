@@ -124,6 +124,27 @@ export function WalletDetailScreen() {
         Balance{' '}
         <Amount value={w.balance ?? '0'} currency={currency} className="font-semibold text-label" />
       </p>
+      {w.reserved && w.reserved !== '0' ? (
+        <div
+          className="flex flex-col gap-1 rounded-lg border border-border bg-surface-1 px-4 py-3 text-sm"
+          data-testid="reserve-lines"
+        >
+          <p className="flex justify-between">
+            <span className="text-label-secondary">Reserved for goals</span>
+            <Amount value={w.reserved} currency={currency} />
+          </p>
+          <p className="flex justify-between">
+            <span className="text-label-secondary">Available</span>
+            <Amount value={w.available ?? '0'} currency={currency} className="font-semibold" />
+          </p>
+          {/* A warning, never an error: spending can take a wallet below what is reserved in it. */}
+          {w.overReserved ? (
+            <p role="status" className="pt-1 text-warning">
+              This wallet has less than is reserved in it.
+            </p>
+          ) : null}
+        </div>
+      ) : null}
       <div className="flex gap-3">
         <Button className="flex-1" onClick={() => setTopUp(true)}>
           <Plus aria-hidden className="size-5" />

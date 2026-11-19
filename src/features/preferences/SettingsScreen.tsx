@@ -5,7 +5,6 @@ import { SegmentedControl } from '@/shared/ui/SegmentedControl'
 import { SettingsGroup, SettingsRow } from '@/shared/ui/SettingsRow'
 import { Switch } from '@/shared/ui/Switch'
 
-// The Goals row is added by the phase that builds that screen (F8).
 export function SettingsScreen() {
   const { preferences, update } = usePreferences()
   const { space } = useSpace()
@@ -20,6 +19,7 @@ export function SettingsScreen() {
           to="/s/$spaceId/categories"
           params={{ spaceId: space.id }}
         />
+        <SettingsRow label="Goals" to="/s/$spaceId/goals" params={{ spaceId: space.id }} />
         <SettingsRow label="Currency" to="/settings/currency" />
       </SettingsGroup>
       <SettingsGroup>

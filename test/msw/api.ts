@@ -73,6 +73,14 @@ export const anonHandlers = [
   ),
 ]
 
+export const emptySummary = {
+  currency: 'IDR',
+  netWorth: '0',
+  cash: '0',
+  trackingMode: 'FULL_NET_WORTH',
+  warnings: [],
+} satisfies S['networth.SummaryDTO']
+
 export const emptyWallets = {
   items: [],
   total: { total: '0' as unknown as number, currency: 'IDR', warnings: [] }, // the API sends a string
@@ -103,6 +111,14 @@ export function makeAuthedHandlers(
       HttpResponse.json({ currency: 'IDR', items: [], warnings: [] }),
     ),
     http.get(`${BASE}/spaces/:spaceId/categories`, () => HttpResponse.json([])),
+    http.get(`${BASE}/spaces/:spaceId/net-worth/summary`, () => HttpResponse.json(emptySummary)),
+    http.get(`${BASE}/spaces/:spaceId/net-worth/history`, () =>
+      HttpResponse.json({ currency: 'IDR', points: [], range: '1M' }),
+    ),
+    http.get(`${BASE}/spaces/:spaceId/manual-assets`, () =>
+      HttpResponse.json({ items: [], totals: {} }),
+    ),
+    http.get(`${BASE}/spaces/:spaceId/goals`, () => HttpResponse.json({ items: [] })),
   ]
 }
 
@@ -121,4 +137,12 @@ export const authedHandlers = [
     HttpResponse.json({ currency: 'IDR', items: [], warnings: [] }),
   ),
   http.get(`${BASE}/spaces/:spaceId/categories`, () => HttpResponse.json([])),
+  http.get(`${BASE}/spaces/:spaceId/net-worth/summary`, () => HttpResponse.json(emptySummary)),
+  http.get(`${BASE}/spaces/:spaceId/net-worth/history`, () =>
+    HttpResponse.json({ currency: 'IDR', points: [], range: '1M' }),
+  ),
+  http.get(`${BASE}/spaces/:spaceId/manual-assets`, () =>
+    HttpResponse.json({ items: [], totals: {} }),
+  ),
+  http.get(`${BASE}/spaces/:spaceId/goals`, () => HttpResponse.json({ items: [] })),
 ]

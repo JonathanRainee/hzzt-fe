@@ -10,6 +10,7 @@ export function invalidateMoney(queryClient: QueryClient, spaceId: string): Prom
   return Promise.all([
     queryClient.invalidateQueries({ queryKey: keys.wallets() }),
     queryClient.invalidateQueries({ queryKey: keys.investments() }),
+    queryClient.invalidateQueries({ queryKey: keys.manualAssetsAll() }),
     queryClient.invalidateQueries({ queryKey: ['space', spaceId, 'transactions'] }),
     queryClient.invalidateQueries({ queryKey: keys.netWorth() }),
     queryClient.invalidateQueries({ queryKey: keys.dashboard() }),

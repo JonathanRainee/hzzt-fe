@@ -54,7 +54,27 @@ interface FakeInvestment {
   participants: Array<Record<string, unknown>>
 }
 
+interface FakeAsset {
+  id: string
+  kind: 'FIXED_ASSET' | 'RECEIVABLE' | 'LIABILITY'
+  name: string
+  icon: string
+  currency: string
+  currentValue: string
+}
+interface FakeGoal {
+  id: string
+  name: string
+  icon: string
+  currency: string
+  targetAmount: string
+  /** walletId -> reserved amount */
+  reserves: Record<string, number>
+}
+
 export interface FakeApi {
+  assets: FakeAsset[]
+  goals: FakeGoal[]
   investments: FakeInvestment[]
   categories: FakeCategory[]
   wallets: FakeWallet[]
@@ -117,6 +137,8 @@ export async function installFakeApi(
     signedIn: opts.signedIn ?? false,
     calls: { refresh: 0 },
     activated: [],
+    assets: [],
+    goals: [],
     investments: [],
     categories: [],
     wallets: [],
@@ -135,6 +157,15 @@ export async function installFakeApi(
     const json = (status: number, body: unknown) =>
       route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(body) })
 
+    const reservedOn = (walletId: string) =>
+      state.goals.reduce((n, g) => n + (g.reserves[walletId] ?? 0), 0)
+    // wallets expose reserved/available, as the real API does
+    const withReserve = (w: FakeWallet) => ({
+      ...w,
+      reserved: String(reservedOn(w.id)),
+      available: String(Number(w.balance) - reservedOn(w.id)),
+      overReserved: Number(w.balance) < reservedOn(w.id),
+    })
     const activate = /^\/spaces\/([^/]+)\/activate$/.exec(path)
     if (req.method() === 'POST' && activate) {
       state.activated.push(activate[1] as string)
@@ -177,7 +208,8 @@ export async function installFakeApi(
           title,
           occurredAt: new Date().toISOString(),
         })
-      if (!id && req.method() === 'GET') return json(200, listBody())
+      if (!id && req.method() === 'GET')
+        return json(200, { ...listBody(), items: listBody().items.map(withReserve) })
       if (!id && req.method() === 'POST') {
         const b = req.postDataJSON() as Partial<FakeWallet> & { initialBalance?: string }
         const w: FakeWallet = {
@@ -206,7 +238,7 @@ export async function installFakeApi(
       }
       const w = find()
       if (!w) return json(404, envelope('NOT_FOUND'))
-      if (!sub && req.method() === 'GET') return json(200, w)
+      if (!sub && req.method() === 'GET') return json(200, withReserve(w))
       if (!sub && req.method() === 'PATCH') {
         Object.assign(w, req.postDataJSON())
         return json(200, w)
@@ -344,6 +376,139 @@ export async function installFakeApi(
         .filter((t) => !q || t.title.toLowerCase().includes(q))
         .map((t) => ({ ...t, wallet: { id: t.walletId, name: '' } }))
       return json(200, { items })
+    }
+    if (req.method() === 'GET' && /^\/spaces\/[^/]+\/net-worth\/summary$/.test(path)) {
+      const sum = (k: FakeAsset['kind']) =>
+        state.assets.filter((a) => a.kind === k).reduce((n, a) => n + Number(a.currentValue), 0)
+      const cash = state.wallets.reduce((n, w) => n + Number(w.balance), 0)
+      return json(200, {
+        currency: 'IDR',
+        cash: String(cash),
+        fixedAssets: String(sum('FIXED_ASSET')),
+        receivables: String(sum('RECEIVABLE')),
+        liabilities: String(sum('LIABILITY')),
+        netWorth: String(cash + sum('FIXED_ASSET') + sum('RECEIVABLE') - sum('LIABILITY')),
+        trackingMode: 'FULL_NET_WORTH',
+        warnings: [],
+        investments: { value: '0', cost: '0', unrealizedPl: '0', unrealizedPlPct: null },
+      })
+    }
+    if (req.method() === 'GET' && /^\/spaces\/[^/]+\/net-worth\/history$/.test(path))
+      return json(200, { currency: 'IDR', range: '1M', points: [] })
+    const assetRoute = /^\/spaces\/[^/]+\/manual-assets(?:\/([^/]+))?(?:\/(settlements))?$/.exec(
+      path,
+    )
+    if (assetRoute) {
+      const [, aid, sub] = assetRoute
+      const view = (a: FakeAsset) => ({ ...a, history: [] })
+      if (!aid && req.method() === 'GET') {
+        const kind = new URL(req.url()).searchParams.get('kind')
+        const items = state.assets.filter((a) => a.kind === kind)
+        return json(200, {
+          items: items.map(view),
+          totals: {
+            [kind ?? '']: {
+              total: String(items.reduce((n, a) => n + Number(a.currentValue), 0)),
+              currency: 'IDR',
+              warnings: [],
+            },
+          },
+        })
+      }
+      if (!aid && req.method() === 'POST') {
+        const b = req.postDataJSON() as Partial<FakeAsset>
+        const a: FakeAsset = {
+          id: `a-${state.assets.length + 1}`,
+          kind: b.kind ?? 'FIXED_ASSET',
+          name: b.name ?? '',
+          icon: b.icon ?? '🏠',
+          currency: b.currency ?? 'IDR',
+          currentValue: b.currentValue ?? '0',
+        }
+        state.assets.push(a)
+        return json(201, view(a))
+      }
+      const asset = state.assets.find((a) => a.id === aid)
+      if (!asset) return json(404, envelope('NOT_FOUND'))
+      if (!sub && req.method() === 'GET') return json(200, view(asset))
+      if (sub === 'settlements' && req.method() === 'POST') {
+        const b = req.postDataJSON() as { walletId: string; amount: string }
+        const w = state.wallets.find((x) => x.id === b.walletId)
+        if (!w) return json(404, envelope('NOT_FOUND'))
+        if (Number(b.amount) > Number(asset.currentValue))
+          return json(422, envelope('SETTLEMENT_EXCEEDS_BALANCE'))
+        asset.currentValue = String(Number(asset.currentValue) - Number(b.amount))
+        w.balance = String(
+          Number(w.balance) + (asset.kind === 'LIABILITY' ? -1 : 1) * Number(b.amount),
+        )
+        return json(201, { asset: view(asset), transaction: {} })
+      }
+    }
+    const goalRoute = /^\/spaces\/[^/]+\/goals(?:\/([^/]+))?(?:\/allocations\/([^/]+))?$/.exec(path)
+    if (goalRoute) {
+      const [, gid, wid] = goalRoute
+      const view = (g: FakeGoal) => {
+        const progress = Object.values(g.reserves).reduce((n, v) => n + v, 0)
+        const pct = (progress / Number(g.targetAmount)) * 100
+        return {
+          id: g.id,
+          name: g.name,
+          icon: g.icon,
+          color: PALETTE[0],
+          currency: g.currency,
+          targetAmount: g.targetAmount,
+          progress: String(progress),
+          progressPct: pct.toFixed(2),
+          remaining: String(Math.max(0, Number(g.targetAmount) - progress)),
+          warnings: [],
+          allocations: Object.entries(g.reserves).map(([walletId, amount]) => ({
+            walletId,
+            walletName: state.wallets.find((w) => w.id === walletId)?.name,
+            walletCurrency: g.currency,
+            amount: String(amount),
+            converted: String(amount),
+          })),
+          ...(progress >= Number(g.targetAmount) ? { achievedAt: new Date().toISOString() } : {}),
+        }
+      }
+      if (!gid && req.method() === 'GET') return json(200, { items: state.goals.map(view) })
+      if (!gid && req.method() === 'POST') {
+        const b = req.postDataJSON() as {
+          name: string
+          icon: string
+          currency?: string
+          targetAmount: string
+          initialReserve?: { walletId: string; amount: string }
+        }
+        const g: FakeGoal = {
+          id: `g-${state.goals.length + 1}`,
+          name: b.name,
+          icon: b.icon,
+          currency: b.currency ?? 'IDR',
+          targetAmount: b.targetAmount,
+          reserves: {},
+        }
+        if (b.initialReserve) {
+          const w = state.wallets.find((x) => x.id === b.initialReserve?.walletId)
+          if (!w || Number(b.initialReserve.amount) > Number(w.balance) - reservedOn(w.id))
+            return json(422, envelope('INSUFFICIENT_AVAILABLE_BALANCE'))
+          g.reserves[w.id] = Number(b.initialReserve.amount)
+        }
+        state.goals.push(g)
+        return json(201, view(g))
+      }
+      const goal = state.goals.find((x) => x.id === gid)
+      if (!goal) return json(404, envelope('NOT_FOUND'))
+      if (!wid && req.method() === 'GET') return json(200, view(goal))
+      if (wid && req.method() === 'PUT') {
+        const { amount } = req.postDataJSON() as { amount: string }
+        const w = state.wallets.find((x) => x.id === wid)
+        if (!w) return json(404, envelope('NOT_FOUND'))
+        if (Number(amount) > Number(w.balance) - reservedOn(w.id) + (goal.reserves[w.id] ?? 0))
+          return json(422, envelope('INSUFFICIENT_AVAILABLE_BALANCE'))
+        goal.reserves[w.id] = Number(amount)
+        return json(200, view(goal))
+      }
     }
     if (req.method() === 'GET' && path === '/investment-types') return json(200, metas)
     if (req.method() === 'GET' && path === '/market/crypto/search') {
