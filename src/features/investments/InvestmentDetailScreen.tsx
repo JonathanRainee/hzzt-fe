@@ -50,10 +50,10 @@ export function InvestmentDetailScreen() {
     return () => clearTimeout(t)
   }, [cooldown])
 
-  if (investment.isPending) return <Skeleton className="mx-auto h-64 max-w-xl" />
+  if (investment.isPending) return <Skeleton className="mx-auto h-64 max-w-4xl" />
   if (investment.isError && isNotFound(investment.error)) {
     return (
-      <div className="mx-auto max-w-xl">
+      <div className="mx-auto max-w-4xl">
         <EmptyState
           title="You no longer have access"
           description="This investment was removed or is no longer shared with you."
@@ -68,7 +68,7 @@ export function InvestmentDetailScreen() {
   }
   if (investment.isError || !investment.data) {
     return (
-      <div className="mx-auto max-w-xl">
+      <div className="mx-auto max-w-4xl">
         <EmptyState
           title="Couldn't load this investment"
           action={<Button onClick={() => void investment.refetch()}>Try again</Button>}
@@ -102,7 +102,7 @@ export function InvestmentDetailScreen() {
     })
 
   return (
-    <div className="mx-auto flex max-w-xl flex-col gap-5">
+    <div className="mx-auto flex max-w-4xl flex-col gap-5">
       <PageHeader title={i.name ?? 'Investment'} />
       <p className="-mt-3 flex flex-wrap items-center gap-2 text-sm text-label-secondary">
         <span aria-hidden>{i.icon}</span> {i.symbol}

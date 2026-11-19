@@ -9,7 +9,7 @@ export function SettingsScreen() {
   const { preferences, update } = usePreferences()
   const { space } = useSpace()
   return (
-    <div className="mx-auto flex max-w-xl flex-col gap-6">
+    <div className="mx-auto flex max-w-2xl flex-col gap-6">
       <PageHeader title="Settings" />
       <SettingsGroup>
         <SettingsRow label="Profile" to="/settings/profile" />

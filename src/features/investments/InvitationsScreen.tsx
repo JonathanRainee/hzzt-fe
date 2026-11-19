@@ -21,7 +21,7 @@ export function InvitationsScreen() {
   const [chosen, setChosen] = useState<Record<string, string>>({})
 
   return (
-    <div className="mx-auto flex max-w-xl flex-col gap-4">
+    <div className="mx-auto flex max-w-4xl flex-col gap-4">
       <PageHeader title="Shared investments" />
       {invitations.isPending ? (
         <Skeleton className="h-28" />

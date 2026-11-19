@@ -63,7 +63,7 @@ export function CategoriesScreen() {
   const warnings = (categories.data ?? []).flatMap((c) => c.stats?.warnings ?? [])
 
   return (
-    <div className="mx-auto flex max-w-xl flex-col gap-4">
+    <div className="mx-auto flex w-full max-w-[1400px] flex-col gap-4">
       <PageHeader
         title="Categories"
         backToSettings
@@ -119,7 +119,7 @@ export function CategoriesScreen() {
               </Button>
             </div>
           ) : null}
-          <ul className="flex flex-col gap-3">
+          <ul className="grid grid-cols-1 gap-3 lg:grid-cols-2 xl:grid-cols-3">
             {categories.data.map((c, i, all) => (
               <li key={c.id}>
                 <CategoryRow

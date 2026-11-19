@@ -32,7 +32,7 @@ export function CreateInvestmentScreen() {
   const meta = metas.find((m) => m.assetType === (assetType ?? metas[0]?.assetType))
 
   return (
-    <div className="mx-auto flex max-w-xl flex-col gap-5">
+    <div className="mx-auto flex max-w-2xl flex-col gap-5">
       <PageHeader title="Add investment" />
       {types.isPending ? (
         <Skeleton className="h-64" />

@@ -88,7 +88,7 @@ export function HistoryScreen() {
   const filtered = hasAnyFilter(filters)
 
   return (
-    <div className="mx-auto flex max-w-xl flex-col gap-3">
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-3">
       <h1 className="text-xl font-semibold">History</h1>
 
       <div className="sticky top-14 z-20 -mx-4 flex flex-col gap-2 bg-bg px-4 py-2">

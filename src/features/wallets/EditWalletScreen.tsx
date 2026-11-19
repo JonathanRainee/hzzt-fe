@@ -40,7 +40,7 @@ export function EditWalletScreen() {
   const wallet = useWallet(space.id, id)
 
   return (
-    <div className="mx-auto flex max-w-xl flex-col gap-8">
+    <div className="mx-auto flex max-w-2xl flex-col gap-8">
       <PageHeader title="Edit wallet" />
       {wallet.isPending ? (
         <Skeleton className="h-64" />

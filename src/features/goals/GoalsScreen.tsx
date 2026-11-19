@@ -59,7 +59,7 @@ export function GoalsScreen() {
   const { space } = useSpace()
   const goals = useGoals(space.id)
   return (
-    <div className="mx-auto flex max-w-xl flex-col gap-4">
+    <div className="mx-auto flex w-full max-w-[1400px] flex-col gap-4">
       <PageHeader
         title="Goals"
         backToSettings
@@ -97,7 +97,7 @@ export function GoalsScreen() {
       ) : (
         <>
           <WarningsStrip warnings={goals.data.flatMap((g) => g.warnings ?? [])} />
-          <ul className="flex flex-col gap-3">
+          <ul className="grid grid-cols-1 gap-3 lg:grid-cols-2 xl:grid-cols-3">
             {goals.data.map((g) => (
               <li key={g.id}>
                 <GoalCard goal={g} spaceId={space.id} />

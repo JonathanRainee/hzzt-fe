@@ -104,10 +104,10 @@ export function GoalDetailScreen() {
   const remove = useDeleteGoal(space.id, id)
   const [confirm, setConfirm] = useState(false)
 
-  if (goal.isPending) return <Skeleton className="mx-auto h-64 max-w-xl" />
+  if (goal.isPending) return <Skeleton className="mx-auto h-64 max-w-4xl" />
   if (goal.isError || !goal.data) {
     return (
-      <div className="mx-auto max-w-xl">
+      <div className="mx-auto max-w-4xl">
         <EmptyState
           title="Couldn't load this goal"
           action={<Button onClick={() => void goal.refetch()}>Try again</Button>}
@@ -123,7 +123,7 @@ export function GoalDetailScreen() {
   )
 
   return (
-    <div className="mx-auto flex max-w-xl flex-col gap-5">
+    <div className="mx-auto flex max-w-4xl flex-col gap-5">
       <PageHeader title={g.name ?? 'Goal'} />
       <Card className="flex items-center gap-5" data-testid="goal-summary">
         <ProgressRing

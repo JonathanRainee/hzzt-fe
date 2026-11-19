@@ -80,10 +80,10 @@ export function WalletDetailScreen() {
     return [...byDay.entries()]
   }, [txns.data])
 
-  if (wallet.isPending) return <Skeleton className="mx-auto aspect-[1.7/1] max-w-xl" />
+  if (wallet.isPending) return <Skeleton className="mx-auto aspect-[1.7/1] max-w-4xl" />
   if (wallet.isError || !wallet.data) {
     return (
-      <div className="mx-auto max-w-xl">
+      <div className="mx-auto max-w-4xl">
         <EmptyState
           title="Couldn't load this wallet"
           description={wallet.isError ? errorMessage(wallet.error) : undefined}
@@ -97,7 +97,7 @@ export function WalletDetailScreen() {
   const currency = w.currency ?? ''
 
   return (
-    <div className="mx-auto flex max-w-xl flex-col gap-5">
+    <div className="mx-auto flex max-w-4xl flex-col gap-5">
       <PageHeader
         title={w.name ?? 'Wallet'}
         action={

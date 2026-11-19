@@ -27,10 +27,10 @@ export function AssetDetailScreen() {
   const [settling, setSettling] = useState(false)
   const [confirm, setConfirm] = useState(false)
 
-  if (asset.isPending) return <Skeleton className="mx-auto h-48 max-w-xl" />
+  if (asset.isPending) return <Skeleton className="mx-auto h-48 max-w-4xl" />
   if (asset.isError || !asset.data) {
     return (
-      <div className="mx-auto max-w-xl">
+      <div className="mx-auto max-w-4xl">
         <EmptyState
           title="Couldn't load this item"
           action={<Button onClick={() => void asset.refetch()}>Try again</Button>}
@@ -43,7 +43,7 @@ export function AssetDetailScreen() {
   const currency = a.currency ?? ''
 
   return (
-    <div className="mx-auto flex max-w-xl flex-col gap-5">
+    <div className="mx-auto flex max-w-4xl flex-col gap-5">
       <PageHeader title={a.name ?? meta.noun} />
       <Card className="flex flex-col gap-1" data-testid="asset-card">
         <p className="text-sm text-label-secondary">
@@ -156,7 +156,7 @@ export function EditAssetScreen() {
   const { id } = useParams({ from: '/_authed/s/$spaceId/assets/$id/edit' })
   const asset = useManualAsset(space.id, id)
   return (
-    <div className="mx-auto flex max-w-xl flex-col gap-5">
+    <div className="mx-auto flex max-w-4xl flex-col gap-5">
       <PageHeader title="Edit" />
       {asset.isPending ? (
         <Skeleton className="h-64" />
@@ -178,7 +178,7 @@ export function EditAssetScreen() {
 
 export function NewAssetScreen({ kind }: { kind: AssetKind }) {
   return (
-    <div className="mx-auto flex max-w-xl flex-col gap-5">
+    <div className="mx-auto flex max-w-4xl flex-col gap-5">
       <PageHeader title={kindMeta(kind).addLabel} />
       <AssetForm kind={kind} />
     </div>

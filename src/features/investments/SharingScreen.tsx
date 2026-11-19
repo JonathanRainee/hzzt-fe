@@ -57,10 +57,10 @@ export function SharingScreen() {
   }, [participants.data, rows])
 
   if (investment.isPending || (participants.isPending && !sharedIn))
-    return <Skeleton className="mx-auto h-64 max-w-xl" />
+    return <Skeleton className="mx-auto h-64 max-w-2xl" />
   if (sharedIn) {
     return (
-      <div className="mx-auto max-w-xl">
+      <div className="mx-auto max-w-2xl">
         <EmptyState
           title="Only the owner can change sharing"
           description="This investment is shared with you, so it is read-only."
@@ -70,7 +70,7 @@ export function SharingScreen() {
   }
   if (investment.isError || participants.isError || !rows) {
     return (
-      <div className="mx-auto max-w-xl">
+      <div className="mx-auto max-w-2xl">
         <EmptyState
           title="Couldn't load sharing"
           description={participants.isError ? errorMessage(participants.error) : undefined}
@@ -87,7 +87,7 @@ export function SharingScreen() {
     setRows(rows.map((r) => (r.key === k ? { ...r, ...patch } : r)))
 
   return (
-    <div className="mx-auto flex max-w-xl flex-col gap-5">
+    <div className="mx-auto flex max-w-2xl flex-col gap-5">
       <PageHeader title="Share" />
       <p className="-mt-3 text-sm text-label-secondary">
         Add people who share this investment, with their percentages. Someone with an account gets

@@ -134,7 +134,7 @@ export function AssetsScreen() {
   const change = history.data?.changePct
 
   return (
-    <div className="mx-auto flex max-w-xl flex-col gap-4">
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-4">
       <h1 className="text-xl font-semibold">Assets</h1>
 
       {summary.isPending ? (

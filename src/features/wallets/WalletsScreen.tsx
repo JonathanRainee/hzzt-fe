@@ -29,7 +29,7 @@ export function WalletsScreen() {
   }
 
   return (
-    <div className="mx-auto flex max-w-xl flex-col gap-4">
+    <div className="mx-auto flex w-full max-w-[1400px] flex-col gap-4">
       <div className="flex items-center justify-between gap-3">
         <h1 className="text-xl font-semibold">Wallets</h1>
         <div className="flex gap-2">
@@ -77,7 +77,7 @@ export function WalletsScreen() {
               action={<Button onClick={() => setCreating(true)}>Add wallet</Button>}
             />
           ) : (
-            <ul className="flex flex-col gap-3">
+            <ul className="grid grid-cols-1 gap-3 lg:grid-cols-2">
               {wallets.data.items.map((w, i, all) => (
                 <li key={w.id} className="flex items-center gap-2">
                   <Link

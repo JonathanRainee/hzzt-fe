@@ -63,7 +63,7 @@ export function CardEditorScreen() {
   const { id } = useParams({ from: '/_authed/s/$spaceId/wallets/$id/card' })
   const wallet = useWallet(space.id, id)
   return (
-    <div className="mx-auto flex max-w-xl flex-col gap-5">
+    <div className="mx-auto flex max-w-2xl flex-col gap-5">
       <PageHeader title="Card style" />
       {wallet.isPending ? (
         <Skeleton className="aspect-[1.7/1] w-full" />

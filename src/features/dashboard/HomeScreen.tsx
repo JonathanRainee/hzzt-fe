@@ -2,6 +2,7 @@ import { useNavigate, useSearch } from '@tanstack/react-router'
 import { format } from 'date-fns'
 import { useSpace } from '@/app/providers/SpaceProvider'
 import { periodFromSearch, periodToSearch } from '@/shared/period'
+import { PageGrid } from '@/shared/ui/PageGrid'
 import { PeriodPicker } from '@/shared/ui/PeriodPicker'
 import {
   AnalyticsCard,
@@ -32,7 +33,7 @@ export function HomeScreen() {
     })
 
   return (
-    <div className="mx-auto flex max-w-xl flex-col gap-4">
+    <div className="mx-auto flex w-full max-w-[1400px] flex-col gap-4">
       <div className="flex items-center justify-between gap-3">
         <div>
           <h1 className="text-xl font-semibold">Home</h1>
@@ -50,15 +51,29 @@ export function HomeScreen() {
         />
       </div>
 
-      <OverviewCard period={period} />
-      <NetWorthCard range={range} onRange={(r) => go({ range: r === '1M' ? undefined : r })} />
-      <BreakdownCard period={period} />
-      <AnalyticsCard period={period} />
-      <CalendarCard
-        month={month}
-        onMonth={(m) => go({ month: m === monthOf(new Date()) ? undefined : m })}
-      />
-      <QuickActions />
+      <PageGrid data-testid="home-grid" className="gap-4 lg:gap-6">
+        <div className="min-w-0 lg:col-span-4 [&>*]:h-full">
+          <OverviewCard period={period} />
+        </div>
+        <div className="min-w-0 lg:col-span-8 [&>*]:h-full">
+          <NetWorthCard range={range} onRange={(r) => go({ range: r === '1M' ? undefined : r })} />
+        </div>
+        <div className="min-w-0 lg:col-span-4 [&>*]:h-full">
+          <BreakdownCard period={period} />
+        </div>
+        <div className="min-w-0 lg:col-span-4 [&>*]:h-full">
+          <AnalyticsCard period={period} />
+        </div>
+        <div className="min-w-0 lg:col-span-4 [&>*]:h-full">
+          <QuickActions />
+        </div>
+        <div className="min-w-0 lg:col-span-12">
+          <CalendarCard
+            month={month}
+            onMonth={(m) => go({ month: m === monthOf(new Date()) ? undefined : m })}
+          />
+        </div>
+      </PageGrid>
       <p className="sr-only">Today is {format(new Date(), 'd MMMM yyyy')}</p>
     </div>
   )

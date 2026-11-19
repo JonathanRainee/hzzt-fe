@@ -20,7 +20,7 @@ export function InvestmentsScreen() {
     types.data?.find((t) => t.assetType === assetType)?.label ?? assetType
 
   return (
-    <div className="mx-auto flex max-w-xl flex-col gap-4">
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-4">
       <PageHeader
         title="Investments"
         action={
