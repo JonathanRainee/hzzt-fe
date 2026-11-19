@@ -206,6 +206,7 @@ export function HistoryScreen() {
                     <DayGroupHeader
                       date={row.date}
                       sticky={false}
+                      level={2}
                       income={day?.income}
                       expense={day?.expense}
                       currency={summary.data?.currency}

@@ -18,7 +18,8 @@
 
   /* Accents */
   --accent: #4480ee;
-  --accent-label: #ffffff;
+  /* Text on an accent or destructive fill. Black, because white on these fills is under 4.5:1 in dark. */
+  --accent-label: #000000;
   --positive: #34c759;
   --negative: #ff453a;
   --warning: #ffd60a;
@@ -75,6 +76,7 @@
   --label-secondary: #3c3c43;
   --label-tertiary: #6c6c70;
   --accent: #1f5fd6;
+  --accent-label: #ffffff;
   --positive: #1f8a3d;
   --negative: #d70015;
   --warning: #8a6d00;

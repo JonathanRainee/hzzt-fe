@@ -72,6 +72,8 @@ interface DayGroupHeaderProps {
   expense?: string
   currency?: string
   sticky?: boolean
+  /** Heading level: 2 under a page title, 3 under a section heading. */
+  level?: 2 | 3
 }
 
 /** "Mon, 3 Nov" heading for a day's transactions, with the day's money in and out. */
@@ -81,7 +83,9 @@ export function DayGroupHeader({
   expense,
   currency,
   sticky = true,
+  level = 3,
 }: DayGroupHeaderProps) {
+  const Heading = level === 2 ? 'h2' : 'h3'
   const hasTotals = currency && (income !== undefined || expense !== undefined)
   return (
     <div
@@ -90,9 +94,9 @@ export function DayGroupHeader({
         sticky && 'sticky top-14',
       )}
     >
-      <h3 className="font-semibold text-label-secondary">
+      <Heading className="font-semibold text-label-secondary">
         {format(parseISO(`${date}T12:00:00`), 'EEE, d MMM')}
-      </h3>
+      </Heading>
       {hasTotals ? (
         <p className="flex gap-3 text-label-secondary">
           {income !== undefined && income !== '0' ? (

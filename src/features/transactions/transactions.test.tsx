@@ -68,7 +68,7 @@ describe('history list', () => {
     const list = await screen.findByRole('list', { name: 'Transactions' })
     expect(within(list).getByText('Wed, 18 Nov')).toBeInTheDocument()
     expect(within(list).getByText('Tue, 17 Nov')).toBeInTheDocument()
-    const headers = within(list).getAllByRole('heading', { level: 3 })
+    const headers = within(list).getAllByRole('heading', { level: 2 })
     expect(headers[0]?.closest('div')).toHaveTextContent('In IDR 1,000,000')
     expect(headers[0]?.closest('div')).toHaveTextContent('Out IDR 50,000')
     expect(headers[1]?.closest('div')).not.toHaveTextContent('In IDR')
