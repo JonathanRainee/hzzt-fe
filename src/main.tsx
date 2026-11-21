@@ -1,7 +1,8 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { App } from '@/app/App'
-import './styles/tokens.css'
+import { Providers } from '@/app/providers/Providers'
+import { initObservability } from '@/shared/observability/sentry'
 import './styles/globals.css'
 
 async function enableMocking() {
@@ -14,10 +15,15 @@ async function enableMocking() {
 const root = document.getElementById('root')
 if (!root) throw new Error('Root element #root not found')
 
+// Error reporting is off unless VITE_SENTRY_DSN is set, and then loads lazily (D-F12).
+void initObservability()
+
 enableMocking().then(() => {
   createRoot(root).render(
     <StrictMode>
-      <App />
+      <Providers>
+        <App />
+      </Providers>
     </StrictMode>,
   )
 })
