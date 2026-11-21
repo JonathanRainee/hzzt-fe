@@ -76,7 +76,7 @@ Tick a task only after tests pass and the app starts. Added by the build loop; t
 
 **F11**
 - [x] F11-T01 Page container
-- [ ] F11-T02 TwoColumn
+- [x] F11-T02 TwoColumn
 - [ ] F11-T03 Collapsible
 - [ ] F11-T04 <Amount animate>
 - [ ] F11-T05 Line draw
