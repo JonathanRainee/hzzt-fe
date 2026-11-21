@@ -98,9 +98,9 @@ Tick a task only after tests pass and the app starts. Added by the build loop; t
 - [x] F13-T02 Flatten nesting
 - [x] F13-T03 Group columns
 - [x] F13-T04 Detail screen (the price line is NOT built: blocked on QF-01, no price-history endpoint confirmed)
-- [ ] F13-T05 Add form layout
-- [ ] F13-T06 Summary rail
-- [ ] F13-T07 Tests
+- [x] F13-T05 Add form layout
+- [x] F13-T06 Summary rail
+- [x] F13-T07 Tests (component tests pass; the Playwright spec `investments-form` is written but NOT run: Chromium system libs are missing locally)
 
 
 ### F11: Layout and motion foundation
