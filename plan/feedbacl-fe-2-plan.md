@@ -82,7 +82,7 @@ Tick a task only after tests pass and the app starts. Added by the build loop; t
 - [x] F11-T05 Line draw
 - [x] F11-T06 Bars and donut
 - [x] F11-T07 Rules
-- [ ] F11-T08 Tests
+- [x] F11-T08 Tests (unit tests for exact `134.26` and hidden-amount DOM at several frames pass; the Playwright spec `test/e2e/layout-motion.spec.ts` is written but NOT run: Chromium system libs are missing locally, so run `pnpm test:e2e` once on a machine with a browser)
 
 **F12**
 - [ ] F12-T01 History toolbar
