@@ -79,8 +79,8 @@ Tick a task only after tests pass and the app starts. Added by the build loop; t
 - [x] F11-T02 TwoColumn
 - [x] F11-T03 Collapsible
 - [x] F11-T04 <Amount animate>
-- [ ] F11-T05 Line draw
-- [ ] F11-T06 Bars and donut
+- [x] F11-T05 Line draw
+- [x] F11-T06 Bars and donut
 - [ ] F11-T07 Rules
 - [ ] F11-T08 Tests
 

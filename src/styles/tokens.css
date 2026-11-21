@@ -68,6 +68,11 @@
   /* Motion */
   --dur-fast: 150ms;
   --dur-base: 220ms;
+  --dur-count: 700ms;
+  --dur-draw: 900ms;
+  --dur-bar: 500ms;
+  --dur-sweep: 700ms;
+  --bar-stagger: 40ms;
 
   /* Type */
   --font-sans:
