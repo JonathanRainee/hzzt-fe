@@ -120,3 +120,16 @@ describe('TargetBar', () => {
     expect(screen.getByTestId('target-tick')).toHaveStyle({ left: '0%' })
   })
 })
+
+describe('detail screen (F13-T04)', () => {
+  it('counts the hero value up, ends on the server value, and uses flat hairline rows', async () => {
+    server.use(http.get(`${I}/c0`, () => HttpResponse.json(items[0])))
+    renderApp('/s/s-1/investments/c0')
+    const card = await screen.findByTestId('valuation')
+    // The screen-reader copy is the exact final value at every frame.
+    expect(card.querySelector('.sr-only')).toHaveTextContent('IDR 900')
+    for (const line of card.querySelectorAll('p.border-t'))
+      expect(line).toHaveClass('border-border')
+    expect(card.querySelectorAll('.rounded-lg.border')).toHaveLength(0) // no nested card inside the card
+  })
+})
