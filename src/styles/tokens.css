@@ -1,1 +1,170 @@
-/* Design tokens. Intentionally empty until F1 (see plan/plan.md, Appendix B). */
+/* Design tokens (plan Appendix B). Dark is the default; light overrides under [data-theme='light']. */
+:root {
+  color-scheme: dark;
+
+  /* Surfaces */
+  --bg: #000000;
+  --surface-1: #0a0a0a;
+  --surface-2: #111111;
+  --surface-3: #1a1a1a;
+  --border: #1f1f1f;
+  --border-strong: #333333;
+  --overlay: rgb(0 0 0 / 0.55);
+
+  /* Text */
+  --label: #ffffff;
+  --label-secondary: #a3a3a3;
+  --label-tertiary: #8a8a8a;
+
+  /* Accents */
+  --accent: #ffffff;
+  /* Text on an accent or destructive fill. Black, because white on these fills is under 4.5:1 in dark. */
+  --accent-label: #000000;
+  /* Strict B/W: green and red appear only for trends, PnL and expenses. */
+  --up: #22c55e;
+  --down: #ef4444;
+  --positive: var(--up);
+  --negative: var(--down);
+  --glow-up: 0 0 6px color-mix(in srgb, var(--up) 55%, transparent);
+  --glow-down: 0 0 6px color-mix(in srgb, var(--down) 55%, transparent);
+  --warning: #ffd60a;
+  --transfer: #a3a3a3;
+
+  /* Chart ramp: eight distinct hues, each at least 3:1 against surface-1 (tokens.contrast.test.ts) */
+  --chart-1: #60a5fa;
+  --chart-2: #34d399;
+  --chart-3: #fbbf24;
+  --chart-4: #f472b6;
+  --chart-5: #a78bfa;
+  --chart-6: #fb923c;
+  --chart-7: #22d3ee;
+  --chart-8: #a3e635;
+
+  /* Radius */
+  --r-sm: 10px;
+  --r-md: 16px;
+  --r-lg: 22px;
+  --r-xl: 28px;
+  --r-full: 999px;
+
+  /* Spacing, 4px base */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 20px;
+  --s-6: 24px;
+  --s-8: 32px;
+
+  /* Elevation */
+  --shadow-sheet: 0 -8px 32px rgb(0 0 0 / 0.45);
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.3);
+
+  /* Layout */
+  --page-max-wide: 1200px;
+  --page-max-form: 960px;
+  --gutter: 16px;
+
+  /* Motion */
+  --dur-fast: 150ms;
+  --dur-base: 220ms;
+  --dur-count: 700ms;
+  --dur-draw: 900ms;
+  --dur-bar: 500ms;
+  --dur-sweep: 700ms;
+  --bar-stagger: 40ms;
+
+  /* Type */
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter var", "Segoe UI", Roboto, sans-serif;
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --text-lg: 20px;
+  --text-xl: 28px;
+  --text-2xl: 34px;
+
+  /* Translucent chrome (tab bar, sheet headers) */
+  --chrome: rgb(10 10 10 / 0.72);
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+  --bg: #ffffff;
+  --surface-1: #fafafa;
+  --surface-2: #f4f4f4;
+  --surface-3: #ececec;
+  --border: #e8e8e8;
+  --border-strong: #cfcfcf;
+  --overlay: rgb(0 0 0 / 0.35);
+  --label: #000000;
+  --label-secondary: #525252;
+  --label-tertiary: #6b6b6b;
+  --accent: #000000;
+  --accent-label: #ffffff;
+  --up: #15803d;
+  --down: #b91c1c;
+  --glow-up: 0 0 6px color-mix(in srgb, var(--up) 35%, transparent);
+  --glow-down: 0 0 6px color-mix(in srgb, var(--down) 35%, transparent);
+  --warning: #8a6d00;
+  --transfer: #525252;
+  --chart-1: #2563eb;
+  --chart-2: #047857;
+  --chart-3: #b45309;
+  --chart-4: #be185d;
+  --chart-5: #6d28d9;
+  --chart-6: #c2410c;
+  --chart-7: #0e7490;
+  --chart-8: #4d7c0f;
+  --shadow-sheet: 0 -8px 32px rgb(0 0 0 / 0.12);
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.08);
+  --chrome: rgb(255 255 255 / 0.72);
+}
+
+/* Map tokens into Tailwind v4 utilities: bg-surface-1, text-label, rounded-md, ... */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface-1: var(--surface-1);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-overlay: var(--overlay);
+  --color-label: var(--label);
+  --color-label-secondary: var(--label-secondary);
+  --color-label-tertiary: var(--label-tertiary);
+  --color-accent: var(--accent);
+  --color-accent-label: var(--accent-label);
+  --color-up: var(--up);
+  --color-down: var(--down);
+  --color-positive: var(--positive);
+  --color-negative: var(--negative);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-chart-6: var(--chart-6);
+  --color-chart-7: var(--chart-7);
+  --color-chart-8: var(--chart-8);
+  --color-warning: var(--warning);
+  --color-transfer: var(--transfer);
+  --color-chrome: var(--chrome);
+
+  --radius-sm: var(--r-sm);
+  --radius-md: var(--r-md);
+  --radius-lg: var(--r-lg);
+  --radius-xl: var(--r-xl);
+
+  --shadow-sheet: var(--shadow-sheet);
+  --shadow-card: var(--shadow-card);
+
+  --font-sans: var(--font-sans);
+
+  --text-xs: var(--text-xs);
+  --text-sm: var(--text-sm);
+  --text-base: var(--text-base);
+  --text-lg: var(--text-lg);
+  --text-xl: var(--text-xl);
+  --text-2xl: var(--text-2xl);
+}
