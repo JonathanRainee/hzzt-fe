@@ -89,9 +89,9 @@ Tick a task only after tests pass and the app starts. Added by the build loop; t
 - [x] F12-T02 Filter panel
 - [x] F12-T03 Active filter chips
 - [x] F12-T04 Fill the width
-- [ ] F12-T05 Assets layout
-- [ ] F12-T06 Collapsed summaries
-- [ ] F12-T07 Tests
+- [x] F12-T05 Assets layout
+- [x] F12-T06 Collapsed summaries
+- [x] F12-T07 Tests (unit and component tests pass; the Playwright specs `assets-layout`, `history-desktop` are written but NOT run: Chromium system libs are missing locally)
 
 **F13**
 - [ ] F13-T01 Portfolio hero
